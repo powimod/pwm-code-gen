@@ -1,0 +1,23 @@
+{
+  "name": "pwm-code-gen",
+  "version": "0.0.1",
+  "description": "Powimod code generator",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/powimod/pwm-code-gen.git"
+  },
+  "author": "Dominique Parisot",
+  "license": "GPL-2.0-or-later",
+  "bugs": {
+    "url": "https://github.com/powimod/pwm-code-gen/issues"
+  },
+  "homepage": "https://github.com/powimod/pwm-code-gen#readme",
+  "devDependencies": {
+    "liquidjs": "^10.9.4"
+  }
+}
