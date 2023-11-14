@@ -1,0 +1,5 @@
+name: "test-1"
+objects:
+  - name: "MaterialFamily"
+  - name: "MaterialType"
+  - name: "Material"

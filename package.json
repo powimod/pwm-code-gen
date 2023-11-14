@@ -4,7 +4,7 @@
   "description": "Powimod code generator",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node -- main.js --verbose examples/example-1.yml",
     "start": "node main.js"
   },
   "repository": {
@@ -19,5 +19,10 @@
   "homepage": "https://github.com/powimod/pwm-code-gen#readme",
   "devDependencies": {
     "liquidjs": "^10.9.4"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "js-yaml": "^4.1.0",
+    "yaml": "^2.3.4"
   }
 }
