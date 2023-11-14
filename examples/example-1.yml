@@ -1,5 +1,32 @@
 name: "test-1"
 objects:
   - name: "MaterialFamily"
+    properties:
+      - name: "id"
+        type: "uuid"
+      - name: "name"
+        type: "string"
+
+       
   - name: "MaterialType"
+    properties:
+      - name: "id"
+        type: "uuid"
+      - name: "name"
+        type: "string"
+
+ 
   - name: "Material"
+    properties:
+      - name: "id"
+        type: "uuid"
+      - name: "name"
+        type: "string"
+
+ 
+files:
+  - scope: "project"
+    input: "examples/examples-1-index.html"
+    output: "tmp/index.html"
+
+
