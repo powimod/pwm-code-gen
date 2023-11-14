@@ -18,6 +18,10 @@
  */
 'use strict';
 
+const {Liquid} = require('liquidjs');
+const yaml = require('js-yaml');
+const fs = require('fs');
+
 function controlProject(project, verbose) {
 	if (project.name === undefined) 
 		throw new Error(`Project name is not defined`);
@@ -79,12 +83,45 @@ function controlProject(project, verbose) {
 			throw new Error(`Input is not defined in file n°${i}`);
 		if (projectFile.output === undefined)
 			throw new Error(`Output is not defined in file n°${i}`);
-		if (verbose)
+		if (verbose) {
 			console.log(`- File n°${i} (scope:${projectFile.scope})`);
 			console.log(`    -> input:${projectFile.input})`);
 			console.log(`    -> ouptut:${projectFile.output})`);
+		}
 	}
 
+}
+
+async function generateFiles(project, verbose) {
+	const liquid = new Liquid();
+	// generate files
+	if (verbose)
+		console.log("File generation:");
+	let i = 0;
+	for (let projectFile of project.files){
+		i++;
+		if (verbose) {
+			console.log(`- File n°${i} (scope:${projectFile.scope})`);
+			console.log(`    -> input:${projectFile.input})`);
+			console.log(`    -> ouptut:${projectFile.output})`);
+		}
+		if (projectFile.scope === 'project') {
+			let outputFile = await liquid.parseAndRender(projectFile.output, { project: project } );
+			console.log(`* Generating project file ${outputFile}...`);
+			let fileContent = await liquid.renderFile(projectFile.input, {project: project});
+			fs.writeFileSync(outputFile, fileContent);
+			continue;
+		}
+		for (let projectObject of project.objects){
+			if (projectFile.scope === 'object') {
+				let outputFile = await liquid.parseAndRender(projectFile.output, { object: projectObject, project: project } );
+				console.log(`* Generating object file ${outputFile}...`);
+				let fileContent = await liquid.renderFile(projectFile.input, {object: projectObject, project: project});
+				fs.writeFileSync(outputFile, fileContent);
+				continue;
+			}
+		}
+	}
 }
 
 async function main() {
@@ -102,8 +139,6 @@ async function main() {
 	}
 
 	// read project file
-	const yaml = require('js-yaml');
-	const fs = require('fs');
 	let project = null;
 	try {
   		project = yaml.load(fs.readFileSync(projectFile, 'utf8'));
@@ -122,6 +157,13 @@ async function main() {
 		process.exit(1);
 	}
 
+	//try {
+		await generateFiles(project, verbose)
+	//}
+	//catch (error) {
+	//	console.error(`Error : ${error.message} in project file <${projectFile}> !`);
+	//	process.exit(1);
+	//}
 }
 
 main();

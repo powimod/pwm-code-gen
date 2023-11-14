@@ -1,0 +1,13 @@
+<html>
+<head>
+	<title>Project {{ project.name }}</title>
+</head>
+<body>
+	<h1>Project {{ project.name }}</h1>
+	<ul>
+	{% for object in project.objects %}
+		<li><a href="{{object.name|downcase}}.html">{{ object.name }}</a></li>
+	{% endfor %}
+	</ul>
+</body>
+</html>

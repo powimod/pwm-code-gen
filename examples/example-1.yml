@@ -25,8 +25,11 @@ objects:
 
  
 files:
-  - scope: "project"
-    input: "examples/examples-1-index.html"
-    output: "tmp/index.html"
+  - scope:  "project"
+    input:  "examples/example-1-index.html"
+    output: "output/index.html"
+  - scope:  "object"
+    input:  "examples/example-1-object.html"
+    output: "output/{{object.name | downcase }}.html"
 
 

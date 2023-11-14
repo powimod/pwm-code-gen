@@ -1,0 +1,15 @@
+<html>
+<head>
+	<title>Project {{ project.name }}</title>
+</head>
+<body>
+	<h1>Object {{ object.name }}</h1>
+	<ul>
+	{% for property in object.properties %}
+		<li>{{ property.name }}</a></li>
+	{% endfor %}
+	</ul>
+	<a href="index.html">Retour</a>
+
+</body>
+</html>
