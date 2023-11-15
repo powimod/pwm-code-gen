@@ -4,11 +4,30 @@
 </head>
 <body>
 	<h1>Object {{ object.name }}</h1>
+	<h2>Properties</h2>
 	<ul>
 	{% for property in object.properties %}
 		<li>{{ property.name }}</a></li>
 	{% endfor %}
 	</ul>
+	{% if object.links.length != 0 %}
+	<h2>Target of objects</h2>
+	<ul>
+	{% for link in object.links %}
+		<li><a href="{{ link.link|downcase }}.html">{{ link.link }}</a></li>
+	{% endfor %}
+	</ul>
+	{% endif %}
+
+	{% if object.linkedObjects.length != 0 %}
+	<h2>Source of objects</h2>
+	<ul>
+	{% for linkedObject in object.linkedObjects %}
+		<li><a href="{{ linkedObject.name|downcase }}.html">{{ linkedObject.name }}</a></li>
+	{% endfor %}
+	</ul>
+	{% endif %}
+
 	<a href="index.html">Retour</a>
 
 </body>

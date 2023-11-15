@@ -14,7 +14,9 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
-
+    links:
+      - link: "MaterialFamily"
+        mandatory: true
  
   - name: "Material"
     properties:
@@ -22,6 +24,9 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
+    links:
+      - link: "MaterialFamily"
+      - link: "MaterialType"
 
  
 files:

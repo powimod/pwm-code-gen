@@ -64,6 +64,43 @@ function controlProject(project, verbose) {
 			if (verbose)
 				console.log(`    - Property ${objectProperty.name} (type:${objectProperty.type})`);
 		}
+
+		if (projectObject.links !== undefined) {
+			if (projectObject.links.length === undefined)
+				throw new Error(`Link list is not a list in object <${projectObject.name}>`);
+			if (projectObject.links.length === 0)
+				throw new Error(`Link list is empty in object <${projectObject.name}>`);
+			if (verbose)
+				console.log(`  Link list :`);
+			let j = 0;
+			for (let objectLink of projectObject.links){
+				j++;
+				if (objectLink.link === undefined)
+					throw new Error(`Target of link n°${j} of object <${projectObject.name}> is not defined`);
+				if (objectLink.mandatory === undefined)
+					objectLink.mandatory = false;
+				if (objectLink.mandatory !== true && objectLink.mandatory !== false)
+					throw new Error(`Mandatory attribut of link <${objectLink.link}> of object <${projectObject.name}> is is not a boolean`);
+				if (verbose)
+					console.log(`    - Link ${objectLink.link} (mandatory:${objectLink.mandatory})`);
+				// check target source
+				let sourceObject = null; 
+				for (let obj of project.objects) {
+					if (objectLink.link === obj.name) {
+						sourceObject = obj;
+						break;
+					}
+				}
+				console.log(sourceObject.name);
+				if (sourceObject === undefined) 
+					throw new Error(`Unknown target link <${objectLink.link}> of object <${projectObject.name}>`);
+				objectLink.sourceObject = sourceObject;
+				if (sourceObject.linkedObjects === undefined)
+					sourceObject.linkedObjects = [];
+				sourceObject.linkedObjects.push(projectObject);
+			}
+		}
+
 	}
 
 	if (project.files === undefined)
