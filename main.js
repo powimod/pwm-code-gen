@@ -350,7 +350,9 @@ function loadProjectAttributeList(project, attributesDefinition) {
 			throw new Error(`Name of attribute n°${iAttribute} of project <${project.name}> is not defined`);
 		if (attribute.value === null)
 			throw new Error(`Value of attribute <${attribute.name}> of project <${project.name}> is not defined`);
-		project.attributes.push(attribute);
+		if (project.attributes[attribute.name] !== undefined)
+			throw new Error(`Attribute <${attribute.name}> of project <${project.name}> already exists`);
+		project.attributes[attribute.name] = attribute.value;
 	}
 }
 
@@ -479,20 +481,27 @@ function dumpProject(project)
 		return ' '.repeat(n);
 	}
 	console.log(`\nProject <${project.name}> :`);
+
 	console.log(`Attributes : x${project.attributes.length}`);
-	for (let attribute of project.attributes ) 
-		console.log(`  - Attribut <${attribute.name}> = <${attribute.value}>`);
+	for (let attributeName in project.attributes )  {
+		let attributeValue = project.attributes[attributeName];
+		console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
+	}
+
 	console.log(`Objects : x${project.objects.length}`);
 	for (let projectObject of project.objects) {
 		console.log(`${tab(2)}- Object <${projectObject.name}> :`);
+
 		console.log(`${tab(2)}  Attributes : `); // TODO ${projectObject.attributes.keys().length}`);
 		for (let attributeName in projectObject.attributes )  {
 			let attributeValue = projectObject.attributes[attributeName];
 			console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
 		}
+
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) 
 			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type}, mandatory:${property.mandatory})`);
+
 		console.log(`${tab(2)}  Links : x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )
 			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);

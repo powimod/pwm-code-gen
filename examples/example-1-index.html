@@ -4,6 +4,9 @@
 </head>
 <body>
 	<h1>Project {{ project.name }}</h1>
+	<p>Version : {{project.attributes.version}}</p>
+	<p>{{project.attributes.description}}</p>
+	<p>{{project.attributes.licence}}</p>
 	<ul>
 	{% for object in project.objects %}
 		<li><a href="{{object.attributes.filename}}.html">{{ object.name }}</a></li>

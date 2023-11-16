@@ -4,7 +4,10 @@ attributes:
     value: "My test project"
   - name: "version"
     value: "0.0.1"
+  - name: "licence"
+    value: "GPL-V2 (or later)"
 objects:
+
   - name: "EquipmentFamily"
     attributes:
       - name: "description"
@@ -19,6 +22,10 @@ objects:
       - name: "description"
         type: "string"
         mandatory: false
+      - name: "equipment-type-count"
+        type: "integer"
+      - name: "equipment-count"
+        type: "integer"
        
   - name: "EquipmentType"
     attributes:
@@ -31,6 +38,10 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
+      - name: "description"
+        type: "string"
+      - name: "equipment-count"
+        type: "integer"
     links:
       - name : "family"
         target: "EquipmentFamily"
@@ -39,11 +50,13 @@ objects:
   - name: "Equipment"
     attributes:
       - name: "filename"
-        value: "equipment-type"
+        value: "equipment"
     properties:
       - name: "id"
         type: "uuid"
       - name: "name"
+        type: "string"
+      - name: "description"
         type: "string"
     links:
       - name: "family"
@@ -65,6 +78,12 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
+      - name: "description"
+        type: "string"
+      - name: "section-count"
+        type: "integer"
+      - name: "equipment-count"
+        type: "integer"
 
   - name: "UnitSection"
     attributes:
@@ -77,6 +96,10 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
+      - name: "description"
+        type: "string"
+      - name: "equipment-count"
+        type: "integer"
     links:
       - name: "unit"
         target: "Unit"
@@ -86,8 +109,9 @@ files:
   - scope:  "project"
     input:  "examples/example-1-index.html"
     output: "output/index.html"
+
   - scope:  "object"
     input:  "examples/example-1-object.html"
-    output: "output/{{object.name | downcase }}.html"
+    output: "output/{{object.attributes.filename }}.html"
 
 

@@ -14,7 +14,7 @@
 	<h2>Target of objects</h2>
 	<ul>
 	{% for link in object.links %}
-		<li><a href="{{ link.link.target  }}.html">{{ link.link }}</a></li>
+		<li><a href="{{ link.target.attributes.filename}}.html">{{ link.name | capitalize }}</a></li>
 	{% endfor %}
 	</ul>
 	{% endif %}
