@@ -80,7 +80,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 					loadPropertyMandatory(object, property, attrValue);
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}> in object ${object.name}`);
+					throw new Error(`Unknown attribut <${attrName}> in  property ${property.name} of object ${object.name}`);
 					break;
 			}
 		}
@@ -91,6 +91,63 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 		if (property.mandatory === null)
 			property.mandatory = true;
 		object.properties.push(property);
+	}
+}
+
+function loadAttributeName(attribute, name)
+{
+	if (attribute.name !== null) 
+		throw new Error(`Name of attribute of object <${attribute.object.name}> already defined`);
+	name = name.trim();
+	if (name.length === 0)
+		throw new Error(`Property name of object <${attribute.object.name}> is empty`);
+	attribute.name = name;
+}
+
+function loadAttributeValue(attribute, value)
+{
+	if (attribute.value !== null) 
+		throw new Error(`Value of attribute <${attribute.name}> of object <${attribute.object.name}> already defined`);
+	value = value.trim();
+	if (value.length === 0)
+		throw new Error(`Value of attribute <${attribute.name}> of object <${attribute.object.name}> is empty`);
+	attribute.value = value;
+}
+
+
+function loadObjectAttributeList(object, attributesDefinition) {
+	if (attributesDefinition.length === undefined)
+		throw new Error(`Attribute list of object <${object.name}> is not an array`);
+
+	let iAttribute = 0;
+	for (let attributeDefinition of attributesDefinition) {
+		iAttribute++;
+		let attribute = {
+			name : null,
+			value: null,
+			object: object
+		};
+
+		for (let attrName in attributeDefinition) {
+			let attrValue = attributeDefinition[attrName];
+			switch (attrName) {
+				case 'name':
+					loadAttributeName(attribute, attrValue);
+					break;
+				case 'value':
+					loadAttributeValue(attribute, attrValue);
+					break;
+				default:
+					// FIXME double use of attribute in the same error message
+					throw new Error(`Unknown attribut <${attrName}> in attribute <${attribute.name}> of object <${object.name}>`);
+					break;
+			}
+		}
+		if (attribute.name === null)
+			throw new Error(`Name of attribute n°${iAttribute} of object <${object.name}> is not defined`);
+		if (attribute.value === null)
+			throw new Error(`Value of attribute <${attribute.name}> of object <${object.name}> is not defined`);
+		object.attributes.push(attribute);
 	}
 }
 
@@ -117,6 +174,7 @@ function loadProjectObjectList(project, objectsDefinition) {
 			name: null,
 			properties: [],
 			links : [],
+			attributes: [],
 			project: project
 		};
 
@@ -129,11 +187,14 @@ function loadProjectObjectList(project, objectsDefinition) {
 				case 'properties':
 					loadObjectPropertyList(object, attrValue);
 					break;
+				case 'attributes':
+					loadObjectAttributeList(object, attrValue);
+					break;
 				case 'links':
 					// links loading is done in second step
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}>`);
+					throw new Error(`Unknown attribut <${attrName}> in object <${object.name}>`);
 					break;
 			}
 		}
@@ -141,6 +202,7 @@ function loadProjectObjectList(project, objectsDefinition) {
 			throw new Error(`Name of object n°${iObject} is not defined`);
 		if (object.properties.length === 0)
 			throw new Error(`Property list of object <${object.name}> is empty`);
+		// attribute list can be empty
 		project.objects.push(object);
 	}
 }
@@ -351,14 +413,15 @@ function dumpProject(project)
 	console.log(`\nProject <${project.name}> :`);
 	for (let projectObject of project.objects) {
 		console.log(`${tab(2)}- Object <${projectObject.name}> :`);
+		console.log(`${tab(2)}  Attributes : x${projectObject.attributes.length}`);
+		for (let attribute of projectObject.attributes ) 
+			console.log(`${tab(6)}- Attribut <${attribute.name}> = <${attribute.value}>`);
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
-		for (let property of projectObject.properties) {
+		for (let property of projectObject.properties) 
 			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type}, mandatory:${property.mandatory})`);
-		}
 		console.log(`${tab(2)}  Links : x${projectObject.links.length}`);
-		for (let objectLink of projectObject.links ) {
+		for (let objectLink of projectObject.links )
 			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);
-		}
 	}
 	console.log(`${tab(2)}  Files : x${project.files.length}`);
 	let iFile = 1;
