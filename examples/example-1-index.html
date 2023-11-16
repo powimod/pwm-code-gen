@@ -6,7 +6,7 @@
 	<h1>Project {{ project.name }}</h1>
 	<ul>
 	{% for object in project.objects %}
-		<li><a href="{{object.name|downcase}}.html">{{ object.name }}</a></li>
+		<li><a href="{{object.attributes.filename}}.html">{{ object.name }}</a></li>
 	{% endfor %}
 	</ul>
 </body>

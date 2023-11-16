@@ -101,6 +101,8 @@ function loadObjectAttributeName(attribute, name)
 	name = name.trim();
 	if (name.length === 0)
 		throw new Error(`Property name of object <${attribute.object.name}> is empty`);
+	if (name.includes(' '))
+		throw new Error(`Invalid attribute name <${name}> of object <${attribute.object.name}> is empty (spaces forbidden)`);
 	attribute.name = name;
 }
 
@@ -147,7 +149,9 @@ function loadObjectAttributeList(object, attributesDefinition) {
 			throw new Error(`Name of attribute n°${iAttribute} of object <${object.name}> is not defined`);
 		if (attribute.value === null)
 			throw new Error(`Value of attribute <${attribute.name}> of object <${object.name}> is not defined`);
-		object.attributes.push(attribute);
+		if (object.attributes[attribute.name] !== undefined)
+			throw new Error(`Attribute <${attribute.name}> of object <${object.name}> already exists`);
+		object.attributes[attribute.name] = attribute.value;
 	}
 }
 
@@ -174,7 +178,7 @@ function loadProjectObjectList(project, objectsDefinition) {
 			name: null,
 			properties: [],
 			links : [],
-			attributes: [],
+			attributes: {},
 			project: project
 		};
 
@@ -298,6 +302,8 @@ function loadProjectAttributeName(attribute, name)
 	name = name.trim();
 	if (name.length === 0)
 		throw new Error(`Property name of project <${attribute.project.name}> is empty`);
+	if (name.includes(' '))
+		throw new Error(`Invalid attribute name <${name}> of object <${attribute.object.name}> is empty (spaces forbidden)`);
 	attribute.name = name;
 }
 
@@ -479,9 +485,11 @@ function dumpProject(project)
 	console.log(`Objects : x${project.objects.length}`);
 	for (let projectObject of project.objects) {
 		console.log(`${tab(2)}- Object <${projectObject.name}> :`);
-		console.log(`${tab(2)}  Attributes : x${projectObject.attributes.length}`);
-		for (let attribute of projectObject.attributes ) 
-			console.log(`${tab(6)}- Attribut <${attribute.name}> = <${attribute.value}>`);
+		console.log(`${tab(2)}  Attributes : `); // TODO ${projectObject.attributes.keys().length}`);
+		for (let attributeName in projectObject.attributes )  {
+			let attributeValue = projectObject.attributes[attributeName];
+			console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
+		}
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) 
 			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type}, mandatory:${property.mandatory})`);
@@ -563,9 +571,9 @@ async function main() {
 	}
 
 	// read project file
-	let project = null;
+	let projectDef = null;
 	try {
-  		project = yaml.load(fs.readFileSync(projectFile, 'utf8'));
+  		projectDef = yaml.load(fs.readFileSync(projectFile, 'utf8'));
 	}
 	catch (error) {
 		console.error(`Error : Can't read project file <${error}> !`);
@@ -573,8 +581,9 @@ async function main() {
 	}
 
 	// control project validity
+	let project = null;
 	try {
-		loadProject(project, verbose);
+		project = loadProject(projectDef, verbose);
 	}
 	catch (error) {
 		console.error(`Error : ${error.message} in project file <${projectFile}> !`);

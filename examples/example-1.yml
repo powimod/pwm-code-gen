@@ -21,6 +21,11 @@ objects:
         mandatory: false
        
   - name: "EquipmentType"
+    attributes:
+      - name: "description"
+        value: "Type of equipements"
+      - name: "filename"
+        value: "equipment-type"
     properties:
       - name: "id"
         type: "uuid"
@@ -32,6 +37,9 @@ objects:
         mandatory: true
  
   - name: "Equipment"
+    attributes:
+      - name: "filename"
+        value: "equipment-type"
     properties:
       - name: "id"
         type: "uuid"
@@ -47,6 +55,11 @@ objects:
         mandatory: false
 
   - name: "Unit"
+    attributes:
+      - name: "description"
+        value: "building, factories, storerooms, warehous, etc"
+      - name: "filename"
+        value: "unit"
     properties:
       - name: "id"
         type: "uuid"
@@ -54,6 +67,11 @@ objects:
         type: "string"
 
   - name: "UnitSection"
+    attributes:
+      - name: "description"
+        value: "Part of a unit (room, local, etc)"
+      - name: "filename"
+        value: "unit-section"
     properties:
       - name: "id"
         type: "uuid"
