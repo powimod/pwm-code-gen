@@ -21,6 +21,7 @@
     "liquidjs": "^10.9.4"
   },
   "dependencies": {
+    "assert": "^2.1.0",
     "commander": "^11.1.0",
     "js-yaml": "^4.1.0",
     "yaml": "^2.3.4"

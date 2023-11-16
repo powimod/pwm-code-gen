@@ -1,33 +1,58 @@
 name: "test-1"
 objects:
-  - name: "MaterialFamily"
+  - name: "EquipmentFamily"
     properties:
       - name: "id"
         type: "uuid"
       - name: "name"
         type: "string"
-
+      - name: "description"
+        type: "string"
+        mandatory: false
        
-  - name: "MaterialType"
+  - name: "EquipmentType"
     properties:
       - name: "id"
         type: "uuid"
       - name: "name"
         type: "string"
     links:
-      - link: "MaterialFamily"
+      - name : "family"
+        target: "EquipmentFamily"
         mandatory: true
  
-  - name: "Material"
+  - name: "Equipment"
     properties:
       - name: "id"
         type: "uuid"
       - name: "name"
         type: "string"
     links:
-      - link: "MaterialFamily"
-      - link: "MaterialType"
+      - name: "family"
+        target: "EquipmentFamily"
+      - name: "type"
+        target: "EquipmentType"
+      - name: "section"
+        target: "UnitSection"
+        mandatory: false
 
+  - name: "Unit"
+    properties:
+      - name: "id"
+        type: "uuid"
+      - name: "name"
+        type: "string"
+
+  - name: "UnitSection"
+    properties:
+      - name: "id"
+        type: "uuid"
+      - name: "name"
+        type: "string"
+    links:
+      - name: "unit"
+        target: "Unit"
+ 
  
 files:
   - scope:  "project"
