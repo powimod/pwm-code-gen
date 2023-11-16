@@ -1,4 +1,9 @@
 name: "test-1"
+attributes:
+  - name: "description"
+    value: "My test project"
+  - name: "version"
+    value: "0.0.1"
 objects:
   - name: "EquipmentFamily"
     attributes:

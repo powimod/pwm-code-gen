@@ -94,7 +94,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 	}
 }
 
-function loadAttributeName(attribute, name)
+function loadObjectAttributeName(attribute, name)
 {
 	if (attribute.name !== null) 
 		throw new Error(`Name of attribute of object <${attribute.object.name}> already defined`);
@@ -104,7 +104,7 @@ function loadAttributeName(attribute, name)
 	attribute.name = name;
 }
 
-function loadAttributeValue(attribute, value)
+function loadObjectAttributeValue(attribute, value)
 {
 	if (attribute.value !== null) 
 		throw new Error(`Value of attribute <${attribute.name}> of object <${attribute.object.name}> already defined`);
@@ -132,10 +132,10 @@ function loadObjectAttributeList(object, attributesDefinition) {
 			let attrValue = attributeDefinition[attrName];
 			switch (attrName) {
 				case 'name':
-					loadAttributeName(attribute, attrValue);
+					loadObjectAttributeName(attribute, attrValue);
 					break;
 				case 'value':
-					loadAttributeValue(attribute, attrValue);
+					loadObjectAttributeValue(attribute, attrValue);
 					break;
 				default:
 					// FIXME double use of attribute in the same error message
@@ -290,6 +290,65 @@ function loadProjectFileList(project, filesDefinition) {
 		project.files.push(file);
 	}
 }
+
+function loadProjectAttributeName(attribute, name)
+{
+	if (attribute.name !== null) 
+		throw new Error(`Name of attribute of project <${attribute.project.name}> already defined`);
+	name = name.trim();
+	if (name.length === 0)
+		throw new Error(`Property name of project <${attribute.project.name}> is empty`);
+	attribute.name = name;
+}
+
+function loadProjectAttributeValue(attribute, value)
+{
+	if (attribute.value !== null) 
+		throw new Error(`Value of attribute <${attribute.name}> of project <${attribute.project.name}> already defined`);
+	value = value.trim();
+	if (value.length === 0)
+		throw new Error(`Value of attribute <${attribute.name}> of project <${attribute.project.name}> is empty`);
+	attribute.value = value;
+}
+
+
+function loadProjectAttributeList(project, attributesDefinition) {
+	if (attributesDefinition.length === undefined)
+		throw new Error(`Attribute list of project <${project.name}> is not an array`);
+
+	let iAttribute = 0;
+	for (let attributeDefinition of attributesDefinition) {
+		iAttribute++;
+		let attribute = {
+			name : null,
+			value: null,
+			project: project
+		};
+
+		for (let attrName in attributeDefinition) {
+			let attrValue = attributeDefinition[attrName];
+			switch (attrName) {
+				case 'name':
+					loadProjectAttributeName(attribute, attrValue);
+					break;
+				case 'value':
+					loadProjectAttributeValue(attribute, attrValue);
+					break;
+				default:
+					// FIXME double use of attribute in the same error message
+					throw new Error(`Unknown attribut <${attrName}> in attribute <${attribute.name}> of project <${project.name}>`);
+					break;
+			}
+		}
+		if (attribute.name === null)
+			throw new Error(`Name of attribute n°${iAttribute} of project <${project.name}> is not defined`);
+		if (attribute.value === null)
+			throw new Error(`Value of attribute <${attribute.name}> of project <${project.name}> is not defined`);
+		project.attributes.push(attribute);
+	}
+}
+
+
 function loadProjectStep1(project, projectDefinition, verbose)
 {
 	for (let attrName in projectDefinition) {
@@ -297,6 +356,9 @@ function loadProjectStep1(project, projectDefinition, verbose)
 		switch (attrName) {
 			case 'name':
 				loadProjectName(project, attrValue);
+				break;
+			case 'attributes':
+				loadProjectAttributeList(project, attrValue);
 				break;
 			case 'objects':
 				loadProjectObjectList(project, attrValue);
@@ -411,6 +473,10 @@ function dumpProject(project)
 		return ' '.repeat(n);
 	}
 	console.log(`\nProject <${project.name}> :`);
+	console.log(`Attributes : x${project.attributes.length}`);
+	for (let attribute of project.attributes ) 
+		console.log(`  - Attribut <${attribute.name}> = <${attribute.value}>`);
+	console.log(`Objects : x${project.objects.length}`);
 	for (let projectObject of project.objects) {
 		console.log(`${tab(2)}- Object <${projectObject.name}> :`);
 		console.log(`${tab(2)}  Attributes : x${projectObject.attributes.length}`);
@@ -423,7 +489,7 @@ function dumpProject(project)
 		for (let objectLink of projectObject.links )
 			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);
 	}
-	console.log(`${tab(2)}  Files : x${project.files.length}`);
+	console.log(`Files : x${project.files.length}`);
 	let iFile = 1;
 	for (let file of project.files) {
 		console.log(`${tab(2)}- File n°${iFile++} (scope <${file.scope}>)`);
@@ -438,6 +504,7 @@ function loadProject(projectDefinition, verbose)
 {
 	let project = {
 		name : null,
+		attributes: [],
 		objects : [],
 		files : [],
 	};
