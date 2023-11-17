@@ -61,6 +61,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 	for (let propertyDefinition of propertiesDefinition) {
 		iProperty++;
 		let property = {
+			_type: 'object-property',
 			name : null,
 			type: null,
 			mandatory: null,
@@ -125,6 +126,7 @@ function loadObjectAttributeList(object, attributesDefinition) {
 	for (let attributeDefinition of attributesDefinition) {
 		iAttribute++;
 		let attribute = {
+			_type: 'object-attribute',
 			name : null,
 			value: null,
 			object: object
@@ -175,9 +177,11 @@ function loadProjectObjectList(project, objectsDefinition) {
 	for (let objectDefinition of objectsDefinition) {
 		iObject++;
 		let object = {
+			_type : 'object',
 			name: null,
 			properties: [],
 			links : [],
+			reverseLinks: [],
 			attributes: {},
 			project: project
 		};
@@ -262,6 +266,7 @@ function loadProjectFileList(project, filesDefinition) {
 	for (let fileDefinition of filesDefinition) {
 		iFile++;
 		let file = {
+			_type : 'file',
 			scope: null,
 			input: null,
 			output: null,
@@ -326,6 +331,7 @@ function loadProjectAttributeList(project, attributesDefinition) {
 	for (let attributeDefinition of attributesDefinition) {
 		iAttribute++;
 		let attribute = {
+			_type : 'project-attribute',
 			name : null,
 			value: null,
 			project: project
@@ -410,7 +416,6 @@ function loadLinkTarget(objectLink, targetObjectName) {
 		throw new Error('Link target is not a string');
 	targetObjectName = targetObjectName.trim();
 
-
 	assert.ok(objectLink.object !== undefined);
 	assert.ok(objectLink.object.project !== undefined);
 	let project = objectLink.object.project;
@@ -425,8 +430,10 @@ function loadLinkTarget(objectLink, targetObjectName) {
 
 
 function loadLink(projectObject, linkDef, verbose) {
-	let objectLink = {
+	let link = {
+		_type: 'object-link',
 		name: null,
+		source: projectObject,
 		target: null,
 		mandatory: null,
 		object: projectObject
@@ -435,26 +442,27 @@ function loadLink(projectObject, linkDef, verbose) {
 		let attrValue = linkDef[attrName];
 		switch (attrName) {
 			case 'name':
-				loadLinkName(objectLink, attrValue);
+				loadLinkName(link, attrValue);
 				break;
 			case 'target':
-				loadLinkTarget(objectLink, attrValue);
+				loadLinkTarget(link, attrValue);
 				break;
 			case 'mandatory':
-				loadLinkMandatory(objectLink, attrValue);
+				loadLinkMandatory(link, attrValue);
 				break;
 			default:
 				throw new Error(`Unknown attribut <${attrName} in link definition>`);
 				break;
 		}
 	}
-	if (objectLink.name === null)
+	if (link.name === null)
 		throw new Error(`Link target is not defined`);
-	if (objectLink.target=== null)
-		throw new Error(`Target of link <${objectLink.name}> is not defined`);
-	if (objectLink.mandatory === null)
-		objectLink.mandatory = true;
-	projectObject.links.push(objectLink);
+	if (link.target=== null)
+		throw new Error(`Target of link <${link.name}> is not defined`);
+	if (link.mandatory === null)
+		link.mandatory = true;
+	projectObject.links.push(link);
+	link.target.reverseLinks.push(link);
 }
 
 function loadProjectStep2(project, projectDefinition, verbose)
@@ -520,6 +528,7 @@ function dumpProject(project)
 function loadProject(projectDefinition, verbose)
 {
 	let project = {
+		_type: 'project',
 		name : null,
 		attributes: [],
 		objects : [],

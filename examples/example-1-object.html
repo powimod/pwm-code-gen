@@ -20,10 +20,10 @@
 	{% endif %}
 
 	{% if object.linkedObjects.length != 0 %}
-	<h2>Source of objects</h2>
+	<h2>Reverse linked objects</h2>
 	<ul>
-	{% for linkedObject in object.linkedObjects %}
-		<li><a href="{{ linkedObject.name|downcase }}.html">{{ linkedObject.name }}</a></li>
+	{% for reverseLink in object.reverseLinks %}
+		<li><a href="{{ reverseLink.source.attributes.filename }}.html">{{ reverseLink.source.name }}</a></li>
 	{% endfor %}
 	</ul>
 	{% endif %}
