@@ -157,6 +157,127 @@ function loadObjectAttributeList(object, attributesDefinition) {
 	}
 }
 
+function loadIndexName(index, name) {
+	if (index.name !== null)
+		throw new Error(`Object index name already defined`);
+	name = name.trim();
+	if (name.length === 0)
+		throw new Error(`Object index name is empty`);
+	index.name = name;
+}
+
+function loadIndexUnicity(index, value) {
+	if (index.unique !== null)
+		throw new Error(`Object index unicity already defined`);
+	if (value !== true && value !== false)
+		throw new Error(`Unicity of  is not a boolean`);
+	index.unique = value;
+}
+
+function loadIndexKeyType(indexKey, keyType, keyRef) {
+	const index = indexKey.index;
+	const object = index.object;
+	if (indexKey.type !== null)
+		throw new Error(`Key n°${indexKey.position} of index <${index.name}> of object <${object.name}> already defined`);
+	assert.ok(indexKey.reference === null);
+	if (keyRef.trim === undefined)
+		throw new Error(`Type of key n°${indexKey.position} of index <${index.name}> of object <${object.name}> is not a string`);
+	keyType = keyType.trim();
+	keyRef= keyRef.trim();
+	let reference = null;
+	switch (keyType) {
+		case 'property':
+			reference = object.properties.find( (p) => p.name === keyRef )
+			reference = (reference === undefined) ? null : reference;
+			break;
+		case 'link':
+			console.log(object.links.length);
+			for (let link of object.links) console.log("dOm link : " + link.name);
+			reference = object.links.find( (l) => l.name === keyRef )
+			reference = (reference === undefined) ? null : reference;
+			break;
+		default:
+			throw new Error(`Type of key n°${indexKey.position} of index <${index.name}> of object <${object.name}> is not 'property' or 'link'`);
+	}
+	if (reference === null)
+		throw new Error(`Invalid ${keyType} reference <${keyRef}> in key n°${indexKey.position} of index <${index.name}> of object <${object.name}> does not exist'`);
+	indexKey.type = keyType;
+	indexKey.reference = reference;
+}
+
+function loadIndexKeyList(index, keyListDefinition)
+{
+	if (keyListDefinition.length === undefined)
+		throw new Error(`Key list of index ${index.name} of object ${index.object.name} is not an array`);
+	let iKey = 0;
+	for (let keyDefinition of keyListDefinition) {
+		iKey++;
+		let key = {
+			index: index,
+			position: iKey,
+			type : null,
+			reference : null
+		};
+		for (let attrName in keyDefinition) {
+			let attrValue = keyDefinition[attrName];
+			switch (attrName) {
+				case 'link':
+				case 'property':
+					loadIndexKeyType(key, attrName, attrValue);
+					break;
+				default:
+					throw new Error(`Unknown attribut <${attrName}> in index <${index.name}> of <${index.object.name}>`);
+					break;
+			}
+		}
+		index.keys.push(key);
+	}
+}
+
+function loadObjectIndexList(object, indexListDefinition) {
+	if (indexListDefinition.length === undefined)
+		throw new Error(`Index list of object <${object.name}> is not an array`);
+	console.log("dOm load indexes of " + object.name);
+	let iIndex = 0;
+	for (let indexDefinition of indexListDefinition) {
+		iIndex++;
+		let index = {
+			_type: 'object-index',
+			position: iIndex,
+			name : null,
+			unique: null,
+			keys: [],
+			object: object
+		};
+
+		for (let attrName in indexDefinition) {
+			let attrValue = indexDefinition[attrName];
+			switch (attrName) {
+				case 'name':
+					loadIndexName(index, attrValue);
+					break;
+				case 'unique':
+					loadIndexUnicity(index, attrValue);
+					break;
+				case 'keys':
+					loadIndexKeyList(index, attrValue);
+					break;
+				default:
+					throw new Error(`Unknown attribut <${attrName}> in  index n°${index.position}> of object <${object.name}>`);
+					break;
+			}
+		}
+		// TODO check if another index with the same name already exists
+		if (index.name === null)
+			throw new Error(`Name of index n°${iIndex} of object <${object.name}> is not defined`);
+		if (index.unique === null)
+			index.unique = true;
+		if (index.keys.length === 0)
+			throw new Error(`No keys are defined in index <${index.name}> of object <${index.object.name}>`);
+		object.indexes.push(index);
+	}
+}
+
 
 function loadObjectName(object, name) {
 	if (object.name !== null)
@@ -183,6 +304,7 @@ function loadProjectObjectList(project, objectsDefinition) {
 			links : [],
 			reverseLinks: [],
 			attributes: {},
+			indexes: [],
 			project: project
 		};
 
@@ -198,8 +320,8 @@ function loadProjectObjectList(project, objectsDefinition) {
 				case 'attributes':
 					loadObjectAttributeList(object, attrValue);
 					break;
-				case 'links':
-					// links loading is done in second step
+				case 'indexes': // indexes loading are loaded in second step
+				case 'links':   // links loading are loaded in second step
 					break;
 				default:
 					throw new Error(`Unknown attribut <${attrName}> in object <${object.name}>`);
@@ -475,13 +597,28 @@ function loadProjectStep2(project, projectDefinition, verbose)
 		if (linkListDef === undefined)
 			continue;
 		if (linkListDef.length === undefined)
-			throw new Error(`Link list of object ${object.name} is not an array`);
+			throw new Error(`Link list of object <${object.name}> is not an array`);
 
-		for (let linkDef of linkListDef)
+		for (let linkDef of linkListDef) 
 			loadLink(projectObject, linkDef, verbose);
 	}
 }
 
+function loadProjectStep3(project, projectDefinition, verbose)
+{
+	for (let objectDef of projectDefinition.objects) {
+		let projectObject = project.objects.find( (obj) => obj.name === objectDef.name );
+		assert.ok(projectObject !== undefined);
+
+		let indexListDef = objectDef.indexes;
+		if (indexListDef === undefined)
+			continue;
+		if (indexListDef.length === undefined)
+			throw new Error(`Index list of object <${object.name}> is not an array`);
+
+		loadObjectIndexList(projectObject, indexListDef);
+	}
+}
 
 function dumpProject(project)
 {
@@ -490,15 +627,15 @@ function dumpProject(project)
 	}
 	console.log(`\nProject <${project.name}> :`);
 
-	console.log(`Attributes : x${project.attributes.length}`);
+	console.log(`\nAttributes : x${project.attributes.length}`);
 	for (let attributeName in project.attributes )  {
 		let attributeValue = project.attributes[attributeName];
 		console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
 	}
 
-	console.log(`Objects : x${project.objects.length}`);
+	console.log(`\nObjects : x${project.objects.length}`);
 	for (let projectObject of project.objects) {
-		console.log(`${tab(2)}- Object <${projectObject.name}> :`);
+		console.log(`\n${tab(2)}- Object <${projectObject.name}> :`);
 
 		console.log(`${tab(2)}  Attributes : `); // TODO ${projectObject.attributes.keys().length}`);
 		for (let attributeName in projectObject.attributes )  {
@@ -513,8 +650,17 @@ function dumpProject(project)
 		console.log(`${tab(2)}  Links : x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )
 			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);
+
+		console.log(`${tab(2)}  Indexes : x${projectObject.indexes.length}`);
+		for (let index of projectObject.indexes ) {
+			console.log(`${tab(6)}- Index <${index.name}> (unique:${index.unique}) :`);
+			const keyCount = index.keys.length;
+			for (let key of index.keys)
+				console.log(`${tab(8)}- Key n°${key.position}/${keyCount} : ${key.type} <${key.reference.name}>`);
+		}
 	}
-	console.log(`Files : x${project.files.length}`);
+
+	console.log(`\nFiles : x${project.files.length}`);
 	let iFile = 1;
 	for (let file of project.files) {
 		console.log(`${tab(2)}- File n°${iFile++} (scope <${file.scope}>)`);
@@ -523,7 +669,6 @@ function dumpProject(project)
 	}
 	console.log('');
 }
-
 
 function loadProject(projectDefinition, verbose)
 {
@@ -536,6 +681,7 @@ function loadProject(projectDefinition, verbose)
 	};
 	loadProjectStep1(project, projectDefinition, verbose);
 	loadProjectStep2(project, projectDefinition, verbose);
+	loadProjectStep3(project, projectDefinition, verbose);
 	if (verbose)
 		dumpProject(project);
 	return project;

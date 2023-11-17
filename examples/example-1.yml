@@ -26,6 +26,11 @@ objects:
         type: "integer"
       - name: "equipment-count"
         type: "integer"
+    indexes:
+      - name: "name"
+        keys:
+          - property: "name"
+
        
   - name: "EquipmentType"
     attributes:
@@ -46,6 +51,16 @@ objects:
       - name : "family"
         target: "EquipmentFamily"
         mandatory: true
+    indexes:
+      - name: "family"
+        unique: false
+        keys:
+          - link : "family"
+      - name: "family+name"
+        unique: true
+        keys:
+          - link : "family"
+          - property: "name"
  
   - name: "Equipment"
     attributes:
