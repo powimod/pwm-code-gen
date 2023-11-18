@@ -191,8 +191,6 @@ function loadIndexKeyType(indexKey, keyType, keyRef) {
 			reference = (reference === undefined) ? null : reference;
 			break;
 		case 'link':
-			console.log(object.links.length);
-			for (let link of object.links) console.log("dOm link : " + link.name);
 			reference = object.links.find( (l) => l.name === keyRef )
 			reference = (reference === undefined) ? null : reference;
 			break;
@@ -237,7 +235,6 @@ function loadIndexKeyList(index, keyListDefinition)
 function loadObjectIndexList(object, indexListDefinition) {
 	if (indexListDefinition.length === undefined)
 		throw new Error(`Index list of object <${object.name}> is not an array`);
-	console.log("dOm load indexes of " + object.name);
 	let iIndex = 0;
 	for (let indexDefinition of indexListDefinition) {
 		iIndex++;
@@ -485,6 +482,94 @@ function loadProjectAttributeList(project, attributesDefinition) {
 }
 
 
+
+function loadDataTypeName(dataType, name)
+{
+	if (dataType.name !== null) 
+		throw new Error(`Name of dataType already defined`);
+	name = name.trim();
+	if (name.length === 0)
+		throw new Error(`Data type name is empty`);
+	if (name.includes(' '))
+		throw new Error(`Invalid dataType name <${name}> is empty (spaces forbidden)`);
+	dataType.name = name;
+}
+
+function loadDataTypeType(dataType, type)
+{
+	if (dataType.type !== null) 
+		throw new Error(`Type of dataType <${dataType.name}> already defined`);
+	type = type.trim();
+	if (type.length === 0)
+		throw new Error(`Type of dataType <${dataType.name}> is empty`);
+	if (! type in ['enumeration'])
+		throw new Error(`Invalid dataType <${dataType.name}>`);
+	dataType.type= type;
+}
+
+function loadDataTypeValues(dataType, valuesDef)
+{
+	if (dataType.values !== null)
+		throw new Error(`Values of dataType <${dataType.name}> already defined`);
+	dataType.values = [];
+	if (valuesDef.length === undefined)
+		throw new Error(`Values of dataType <${dataType.name}> is not an array`);
+	let iValue = 0;
+	for (let valueDef of valuesDef){
+		iValue;
+		if (valueDef.value === undefined)
+			throw new Error(`Values n°${iValue} of dataType <${dataType.name}> is not a value`);
+		if (typeof(valueDef.value) !== 'string')
+			throw new Error(`Values n°${iValue} of dataType <${dataType.name}> is not a string`);
+		dataType.values.push(valueDef.value);
+	}
+}
+
+function loadDataTypeList(project, dataTypesDefinition) {
+	if (dataTypesDefinition.length === undefined)
+		throw new Error(`DataType list of project <${project.name}> is not an array`);
+
+	let iDataType = 0;
+	for (let dataTypeDefinition of dataTypesDefinition) {
+		iDataType++;
+		let dataType = {
+			_type : 'datatype',
+			name : null,
+			type: null,
+			values: null,
+			project: project
+		};
+
+		for (let attrName in dataTypeDefinition) {
+			let attrValue = dataTypeDefinition[attrName];
+			switch (attrName) {
+				case 'name':
+					loadDataTypeName(dataType, attrValue);
+					break;
+				case 'type':
+					loadDataTypeType(dataType, attrValue);
+					break;
+				case 'values':
+					loadDataTypeValues(dataType, attrValue);
+					break;
+				default:
+					// FIXME double use of dataType in the same error message
+					throw new Error(`Unknown attribut <${attrName}> in dataType <${dataType.name}>`);
+					break;
+			}
+		}
+		if (dataType.name === null)
+			throw new Error(`Name of dataType n°${iDataType} is not defined`);
+		if (dataType.type === null)
+			throw new Error(`Value of dataType <${dataType.name}> is not defined`);
+		if (project.dataTypes.find( dt => dt.name === dataType.name) !== undefined)
+			throw new Error(`DataType <${dataType.name}> already exists`);
+		project.dataTypes.push(dataType);
+	}
+}
+
+
+
 function loadProjectStep1(project, projectDefinition, verbose)
 {
 	for (let attrName in projectDefinition) {
@@ -492,6 +577,9 @@ function loadProjectStep1(project, projectDefinition, verbose)
 		switch (attrName) {
 			case 'name':
 				loadProjectName(project, attrValue);
+				break;
+			case 'datatypes':
+				loadDataTypeList(project, attrValue);
 				break;
 			case 'attributes':
 				loadProjectAttributeList(project, attrValue);
@@ -633,6 +721,15 @@ function dumpProject(project)
 		console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
 	}
 
+	console.log(`\nData types : x${project.dataTypes.length}`);
+	for (let dataType of project.dataTypes )  {
+		console.log(`${tab(6)}- Data type ${dataType.type} <${dataType.name}>`);
+		if (dataType.type === 'enumeration') 
+			for (let value of dataType.values)
+				console.log(`${tab(10)}- <${value}>`);
+	}
+
+
 	console.log(`\nObjects : x${project.objects.length}`);
 	for (let projectObject of project.objects) {
 		console.log(`\n${tab(2)}- Object <${projectObject.name}> :`);
@@ -676,6 +773,7 @@ function loadProject(projectDefinition, verbose)
 		_type: 'project',
 		name : null,
 		attributes: [],
+		dataTypes : [],
 		objects : [],
 		files : [],
 	};

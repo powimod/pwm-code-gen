@@ -1,4 +1,5 @@
 name: "test-1"
+
 attributes:
   - name: "description"
     value: "My test project"
@@ -6,6 +7,20 @@ attributes:
     value: "0.0.1"
   - name: "licence"
     value: "GPL-V2 (or later)"
+
+
+datatypes:
+  - name : "week"
+    type: "enumeration"
+    values:
+      - value: "Monday"
+      - value: "Tuesday"
+      - value: "Wednesday"
+      - value: "Thursday"
+      - value: "Friday"
+      - value: "Saturday"
+      - value: "Sunday"
+
 objects:
 
   - name: "EquipmentFamily"
@@ -52,10 +67,6 @@ objects:
         target: "EquipmentFamily"
         mandatory: true
     indexes:
-      - name: "family"
-        unique: false
-        keys:
-          - link : "family"
       - name: "family+name"
         unique: true
         keys:
@@ -74,13 +85,22 @@ objects:
       - name: "description"
         type: "string"
     links:
-      - name: "family"
-        target: "EquipmentFamily"
       - name: "type"
         target: "EquipmentType"
       - name: "section"
         target: "UnitSection"
         mandatory: false
+    indexes:
+      - name: "type+name"
+        unique: true
+        keys:
+          - link : "type"
+          - property: "name"
+      - name: "section+name"
+        unique: false
+        keys:
+          - link : "section"
+          - property: "name"
 
   - name: "Unit"
     attributes:
@@ -99,6 +119,11 @@ objects:
         type: "integer"
       - name: "equipment-count"
         type: "integer"
+    indexes:
+      - name: "name"
+        unique: true
+        keys:
+          - property : "name"
 
   - name: "UnitSection"
     attributes:
@@ -118,6 +143,12 @@ objects:
     links:
       - name: "unit"
         target: "Unit"
+    indexes:
+      - name: "unit+name"
+        unique: true
+        keys:
+          - link : "unit"
+          - property : "name"
  
  
 files:
