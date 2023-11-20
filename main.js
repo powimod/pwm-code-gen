@@ -18,11 +18,17 @@
  */
 'use strict';
 
+const programName = 'pwm-code-generator';
+const version = {
+	major: 0,
+	minor: 1,
+	revision: 0
+};
+
 const {Liquid} = require('liquidjs');
 const yaml = require('js-yaml');
 const fs = require('fs');
 const assert = require('node:assert/strict');
-
 
 function loadPropertyName(property, name) {
 	if (property.name !== null) // FIXME add property number in error message
@@ -825,6 +831,9 @@ async function main() {
 	program.parse();
 	const options = program.opts();
 	const verbose = options.verbose ? 1 : undefined;
+
+	if (verbose)
+		console.log(`${programName} V${version.major}.${version.minor}.${version.revision}`);
 
 	let projectFile = program.args[0];
 	if (projectFile === undefined) {
