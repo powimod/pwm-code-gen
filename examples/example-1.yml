@@ -10,7 +10,7 @@ attributes:
 
 
 datatypes:
-  - name : "week"
+  - name : "dayOfWeek"
     type: "enumeration"
     values:
       - value: "Monday"
@@ -22,6 +22,11 @@ datatypes:
       - value: "Sunday"
 
 objects:
+
+  - name: "rendezvous"
+    properties:
+      - name: "day"
+        type: "dayOfWeek"
 
   - name: "EquipmentFamily"
     attributes:

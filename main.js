@@ -21,7 +21,7 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 1,
+	minor: 2,
 	revision: 0
 };
 
@@ -29,6 +29,16 @@ const {Liquid} = require('liquidjs');
 const yaml = require('js-yaml');
 const fs = require('fs');
 const assert = require('node:assert/strict');
+
+const internalDataTypes = [
+	{ internal: true, name: 'string',  type: 'string'},
+	{ internal: true, name: 'integer', type: 'integer'},
+	{ internal: true, name: 'uuid',    type: 'string'},
+	{ internal: true, name: 'id',      type: 'integer'},
+	{ internal: true, name: 'boolean', type: 'boolean'},
+	{ internal: true, name: 'date',    type: 'Date'},
+];
+
 
 function loadPropertyName(property, name) {
 	if (property.name !== null) // FIXME add property number in error message
@@ -44,10 +54,17 @@ function loadPropertyType(object, property, propType) {
 	// if <type> is defined before <name> in YAML
 	if (property.type !== null) // FIXME add property number in error message
 		throw new Error(`Type of property <${property.name}> of object <${object.name}> already defined`);
+	if (typeof(propType) !== 'string')
+		throw new Error(`Type of property <${property.name}> of object <${object.name}> is not a string`);
 	propType = propType.trim();
 	if (propType.length === 0) // FIXME add property number in error message
 		throw new Error(`Property name of object <${object.name} is empty`);
-	property.type = propType;
+	const project = object.project;
+	assert(project !== undefined);
+	let dataType = project.dataTypes.find( dt => dt.name === propType);
+	if (dataType === undefined)
+		throw new Error(`Unknown data type <${propType}> for property <${property.name}> of object <${object.name}>`);
+	property.type = dataType;
 }
 
 function loadPropertyMandatory(object, property, propMandatory) {
@@ -540,6 +557,7 @@ function loadDataTypeList(project, dataTypesDefinition) {
 		iDataType++;
 		let dataType = {
 			_type : 'datatype',
+			internal: false,
 			name : null,
 			type: null,
 			values: null,
@@ -729,6 +747,8 @@ function dumpProject(project)
 
 	console.log(`\nData types : x${project.dataTypes.length}`);
 	for (let dataType of project.dataTypes )  {
+		if (dataType.internal)
+			continue;
 		console.log(`${tab(6)}- Data type ${dataType.type} <${dataType.name}>`);
 		if (dataType.type === 'enumeration') 
 			for (let value of dataType.values)
@@ -748,7 +768,7 @@ function dumpProject(project)
 
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) 
-			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type}, mandatory:${property.mandatory})`);
+			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type.name}, mandatory:${property.mandatory})`);
 
 		console.log(`${tab(2)}  Links : x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )
@@ -779,7 +799,7 @@ function loadProject(projectDefinition, verbose)
 		_type: 'project',
 		name : null,
 		attributes: [],
-		dataTypes : [],
+		dataTypes : internalDataTypes,
 		objects : [],
 		files : [],
 	};
