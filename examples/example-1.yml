@@ -42,9 +42,9 @@ objects:
       - name: "description"
         type: "string"
         mandatory: false
-      - name: "equipment-type-count"
+      - name: "equipmentTypeCount"
         type: "integer"
-      - name: "equipment-count"
+      - name: "equipmentCount"
         type: "integer"
     indexes:
       - name: "name"
@@ -57,7 +57,7 @@ objects:
       - name: "description"
         value: "Type of equipements"
       - name: "filename"
-        value: "equipment-type"
+        value: "equipmentType"
     properties:
       - name: "id"
         type: "uuid"
@@ -65,7 +65,7 @@ objects:
         type: "string"
       - name: "description"
         type: "string"
-      - name: "equipment-count"
+      - name: "equipmentCount"
         type: "integer"
     links:
       - name : "family"
@@ -107,6 +107,31 @@ objects:
           - link : "section"
           - property: "name"
 
+
+  - name: "Company"
+    attributes:
+      - name: "description"
+        value: "The company"
+      - name: "filename"
+        value: "company"
+    properties:
+      - name: "name"
+        type: "string"
+      - name: "address"
+        type: "text"
+      - name: "unitCount"
+        type: "integer"
+      - name: "sectionCount"
+        type: "integer"
+      - name: "equipmentCount"
+        type: "integer"
+    indexes:
+      - name: "name"
+        unique: true
+        keys:
+          - property : "name"
+
+
   - name: "Unit"
     attributes:
       - name: "description"
@@ -120,14 +145,18 @@ objects:
         type: "string"
       - name: "description"
         type: "string"
-      - name: "section-count"
+      - name: "sectionCount"
         type: "integer"
-      - name: "equipment-count"
+      - name: "equipmentCount"
         type: "integer"
+    links:
+      - name: "company"
+        target: "Company"
     indexes:
-      - name: "name"
+      - name: "unit+name"
         unique: true
         keys:
+          - link: "company"
           - property : "name"
 
   - name: "UnitSection"
@@ -143,7 +172,7 @@ objects:
         type: "string"
       - name: "description"
         type: "string"
-      - name: "equipment-count"
+      - name: "equipmentCount"
         type: "integer"
     links:
       - name: "unit"
@@ -155,6 +184,31 @@ objects:
           - link : "unit"
           - property : "name"
  
+
+  - name: "Person"
+    attributes:
+      - name: "description"
+        value: "Person working in the company"
+      - name: "filename"
+        value: "person"
+    properties:
+      - name: "id"
+        type: "id"
+      - name: "firstname"
+        type: "string"
+      - name: "lastname"
+        type: "string"
+      - name: "email"
+        type: "string"
+    links:
+      - name: "company"
+        target: "Company"
+    indexes:
+      - name: "lastname+firstname"
+        unique: true
+        keys:
+          - property : "lastname"
+          - property : "firstname"
  
 files:
   - scope:  "project"

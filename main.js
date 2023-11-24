@@ -33,9 +33,10 @@ const assert = require('node:assert/strict');
 const internalDataTypes = [
 	{ internal: true, name: 'string',  type: 'string'},
 	{ internal: true, name: 'integer', type: 'integer'},
+	{ internal: true, name: 'boolean', type: 'boolean'},
+	{ internal: true, name: 'text'   , type: 'string'},  // multi-lines text
 	{ internal: true, name: 'uuid',    type: 'string'},
 	{ internal: true, name: 'id',      type: 'integer'},
-	{ internal: true, name: 'boolean', type: 'boolean'},
 	{ internal: true, name: 'date',    type: 'Date'},
 ];
 
