@@ -76,6 +76,28 @@ function loadPropertyMandatory(object, property, propMandatory) {
 	property.mandatory = propMandatory;
 }
 
+function loadPropertiesAttributeList(property, attributesDefinition)
+{
+	if (typeof(attributesDefinition) !== 'object')
+		throw new Error(`Attribute list of property <${property.object.name}> of object <${property.object.name}> is not an object`);
+	if (property.attributes !== null)
+		throw new Error(`Attribute list of property <${property.object.name}> of object <${property.object.name}> already defined`);
+
+	let attribute = {
+		_type: 'property-attribute',
+		name: null,
+		value: null,
+		property: property
+	};
+
+	let attributeList = new Map();
+	for (let attributeName of Object.keys(attributesDefinition)) {
+		const attributeValue = attributesDefinition[attributeName];
+		attributeList.set(attributeName, attributeValue);
+	}
+	property.attributes = attributeList;
+
+}
 
 function loadObjectPropertyList(object, propertiesDefinition) {
 	if (propertiesDefinition.length === undefined)
@@ -89,6 +111,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			name : null,
 			type: null,
 			mandatory: null,
+			attributes: null,
 			object: object
 		};
 
@@ -104,8 +127,11 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 				case 'mandatory':
 					loadPropertyMandatory(object, property, attrValue);
 					break;
+				case 'attributes':
+					loadPropertiesAttributeList(property, attrValue);
+					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}> in  property ${property.name} of object ${object.name}`);
+					throw new Error(`Unknown attribut <${attrName}> in property <${property.name}> of object <${object.name}>`);
 					break;
 			}
 		}
@@ -115,6 +141,8 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			throw new Error(`Type of property n°${iProperty} of object ${object.name} is not defined`);
 		if (property.mandatory === null)
 			property.mandatory = true;
+		if (property.attributes === null)
+			property.attributes = new Map();
 		object.properties.push(property);
 	}
 }
@@ -768,8 +796,16 @@ function dumpProject(project)
 		}
 
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
-		for (let property of projectObject.properties) 
+		for (let property of projectObject.properties) {
 			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type.name}, mandatory:${property.mandatory})`);
+			if (property.attributes.size > 0) {
+				console.log(`${tab(8)}Attributes:`);
+				for (let attributeName of property.attributes.keys()){
+					const attributeValue = property.attributes.get(attributeName);
+					console.log(`${tab(10)}- ${attributeName} : ${attributeValue}`);
+				}
+			}
+		}
 
 		console.log(`${tab(2)}  Links : x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )

@@ -200,6 +200,12 @@ objects:
         type: "string"
       - name: "email"
         type: "string"
+      - name: "password"
+        type: "string"
+        attributes:
+          minimum-length: 8
+          maximum-length: 20 
+          secret: true
     links:
       - name: "company"
         target: "Company"
