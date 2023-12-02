@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 3,
-	revision: 2
+	revision: 3
 };
 
 const {Liquid} = require('liquidjs');
@@ -370,6 +370,8 @@ function loadObjectIndexList(object, indexListDefinition) {
 			index.unique = true;
 		if (index.keys.length === 0)
 			throw new Error(`No keys are defined in index <${index.name}> of object <${index.object.name}>`);
+		index.keys.forEach (index => index['last'] = false);
+		index.keys[index.keys.length-1]['last'] = true;
 		object.indexes.push(index);
 	}
 }
