@@ -39,6 +39,8 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
+        minimum: "abc2'"
+        maximum: 30
       - name: "description"
         type: "string"
         mandatory: false

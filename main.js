@@ -21,7 +21,7 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 2,
+	minor: 3,
 	revision: 0
 };
 
@@ -72,9 +72,28 @@ function loadPropertyMandatory(object, property, propMandatory) {
 	if (property.mandatory !== null) // FIXME add property number in error message
 		throw new Error(`Attribute <mandatory> of property <${object.name}.${property.name}> is already defined`);
 	if (propMandatory !== true && propMandatory !== false) // FIXME add property number in error message
-		throw new Error(`Property <mandatory> of object <${object.name} is not a boolean`);
+		throw new Error(`Property <mandatory> of property <${object.name}.${property.name}> is not a boolean`);
 	property.mandatory = propMandatory;
 }
+
+function loadPropertyMinimum(property, value)
+{
+	if (property.minimum !== null) // FIXME add property number in error message
+		throw new Error(`Attribute <minimum> of property <${property.object.name}.${property.name}> is already defined`);
+	if (isNaN(value)) // FIXME add property number in error message
+		throw new Error(`Property <minimum> of property <${property.object.name}.${property.name}> is not a number`);
+	property.minimum = value;
+}
+
+function loadPropertyMaximum(property, value)
+{
+	if (property.maximum !== null) // FIXME add property number in error message
+		throw new Error(`Attribute <maximum> of property <${property.object.name}.${property.name}> is already defined`);
+	if (isNaN(value)) // FIXME add property number in error message
+		throw new Error(`Property <maximum> of property <${object.name}.${property.name}> is not a number`);
+	property.maximum = value;
+}
+
 
 function loadPropertiesAttributeList(property, attributesDefinition)
 {
@@ -111,6 +130,8 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			name : null,
 			type: null,
 			mandatory: null,
+			minimum: null,
+			maximum: null,
 			attributes: null,
 			object: object
 		};
@@ -127,6 +148,12 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 				case 'mandatory':
 					loadPropertyMandatory(object, property, attrValue);
 					break;
+				case 'minimum':
+					loadPropertyMinimum(property, attrValue);
+					break;
+				case 'maximum':
+					loadPropertyMaximum(property, attrValue);
+					break;
 				case 'attributes':
 					loadPropertiesAttributeList(property, attrValue);
 					break;
@@ -139,6 +166,8 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			throw new Error(`Name of property n°${iProperty} of object ${object.name} is not defined`);
 		if (property.type === null)
 			throw new Error(`Type of property n°${iProperty} of object ${object.name} is not defined`);
+		if (property.minimum !== null && property.maximum !== null && property.minimum > property.maximum)
+			throw new Error(`Minimum is greater than maximum in property <${property.name}> of object <${object.name}>`);
 		if (property.mandatory === null)
 			property.mandatory = true;
 		if (property.attributes === null)
@@ -798,6 +827,14 @@ function dumpProject(project)
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) {
 			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type.name}, mandatory:${property.mandatory})`);
+			if (property.minimum !== null || property.maximum !== null) {
+				const limits = [];
+				if (property.minimum !== null)
+					limits.push(`minimum=${property.minimum}`);
+				if (property.maximum !== null)
+					limits.push(`maximum=${property.maximum}`);
+				console.log(`${tab(8)}Limits : ${limits.join(', ')}`);
+			}
 			if (property.attributes.size > 0) {
 				console.log(`${tab(8)}Attributes:`);
 				for (let attributeName of property.attributes.keys()){
