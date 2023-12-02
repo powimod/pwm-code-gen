@@ -39,7 +39,7 @@ objects:
         type: "uuid"
       - name: "name"
         type: "string"
-        minimum: "abc2'"
+        minimum: 2
         maximum: 30
       - name: "description"
         type: "string"
@@ -204,10 +204,9 @@ objects:
         type: "string"
       - name: "password"
         type: "string"
-        attributes:
-          minimum-length: 8
-          maximum-length: 20 
-          secret: true
+        secret: true
+        minimum: 6
+        maximum: 20
     links:
       - name: "company"
         target: "Company"

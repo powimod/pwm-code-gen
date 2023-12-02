@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 3,
-	revision: 0
+	revision: 1
 };
 
 const {Liquid} = require('liquidjs');
@@ -72,16 +72,25 @@ function loadPropertyMandatory(object, property, propMandatory) {
 	if (property.mandatory !== null) // FIXME add property number in error message
 		throw new Error(`Attribute <mandatory> of property <${object.name}.${property.name}> is already defined`);
 	if (propMandatory !== true && propMandatory !== false) // FIXME add property number in error message
-		throw new Error(`Property <mandatory> of property <${object.name}.${property.name}> is not a boolean`);
+		throw new Error(`Attribute <mandatory> of property <${object.name}.${property.name}> is not a boolean`);
 	property.mandatory = propMandatory;
 }
+
+function loadPropertySecret(object, property, propSecret) {
+	if (property.secret !== null) // FIXME add property number in error message
+		throw new Error(`Attribute <secret> of property <${object.name}.${property.name}> is already defined`);
+	if (propSecret !== true && propSecret !== false) // FIXME add property number in error message
+		throw new Error(`Attribute <secret> of property <${object.name}.${property.name}> is not a boolean`);
+	property.secret = propSecret;
+}
+
 
 function loadPropertyMinimum(property, value)
 {
 	if (property.minimum !== null) // FIXME add property number in error message
 		throw new Error(`Attribute <minimum> of property <${property.object.name}.${property.name}> is already defined`);
 	if (isNaN(value)) // FIXME add property number in error message
-		throw new Error(`Property <minimum> of property <${property.object.name}.${property.name}> is not a number`);
+		throw new Error(`Attribute <minimum> of property <${property.object.name}.${property.name}> is not a number`);
 	property.minimum = value;
 }
 
@@ -90,7 +99,7 @@ function loadPropertyMaximum(property, value)
 	if (property.maximum !== null) // FIXME add property number in error message
 		throw new Error(`Attribute <maximum> of property <${property.object.name}.${property.name}> is already defined`);
 	if (isNaN(value)) // FIXME add property number in error message
-		throw new Error(`Property <maximum> of property <${object.name}.${property.name}> is not a number`);
+		throw new Error(`Attribute <maximum> of property <${object.name}.${property.name}> is not a number`);
 	property.maximum = value;
 }
 
@@ -130,6 +139,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			name : null,
 			type: null,
 			mandatory: null,
+			secret : null,
 			minimum: null,
 			maximum: null,
 			attributes: null,
@@ -147,6 +157,9 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 					break;
 				case 'mandatory':
 					loadPropertyMandatory(object, property, attrValue);
+					break;
+				case 'secret':
+					loadPropertySecret(object, property, attrValue);
 					break;
 				case 'minimum':
 					loadPropertyMinimum(property, attrValue);
@@ -170,6 +183,8 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			throw new Error(`Minimum is greater than maximum in property <${property.name}> of object <${object.name}>`);
 		if (property.mandatory === null)
 			property.mandatory = true;
+		if (property.secret === null)
+			property.secret = false;
 		if (property.attributes === null)
 			property.attributes = new Map();
 		object.properties.push(property);
@@ -826,7 +841,13 @@ function dumpProject(project)
 
 		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) {
-			console.log(`${tab(6)}- Property <${property.name}> (type:${property.type.name}, mandatory:${property.mandatory})`);
+			const details = [];
+			details.push(`type:${property.type.name}`);
+			if (property.mandatory)
+				details.push('mandatory');
+			if (property.secret)
+				details.push('secret');
+			console.log(`${tab(6)}- Property <${property.name}> (${details.join(', ')})  `);
 			if (property.minimum !== null || property.maximum !== null) {
 				const limits = [];
 				if (property.minimum !== null)
