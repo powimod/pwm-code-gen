@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 3,
-	revision: 1
+	revision: 2
 };
 
 const {Liquid} = require('liquidjs');
@@ -189,6 +189,9 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			property.attributes = new Map();
 		object.properties.push(property);
 	}
+
+	object.properties.forEach (prop => prop['last'] = false);
+	object.properties[object.properties.length-1]['last'] = true;
 }
 
 function loadObjectAttributeName(attribute, name)
