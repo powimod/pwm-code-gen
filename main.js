@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 3,
-	revision: 3
+	revision: 4
 };
 
 const {Liquid} = require('liquidjs');
@@ -74,6 +74,12 @@ function loadPropertyMandatory(object, property, propMandatory) {
 	if (propMandatory !== true && propMandatory !== false) // FIXME add property number in error message
 		throw new Error(`Attribute <mandatory> of property <${object.name}.${property.name}> is not a boolean`);
 	property.mandatory = propMandatory;
+}
+
+function loadPropertyDefault(object, property, value) {
+	if (property.defaultValue !== null)
+		throw new Error(`Attribute <default> of property <${object.name}.${property.name}> is already defined`);
+	property.defaultValue = value;
 }
 
 function loadPropertySecret(object, property, propSecret) {
@@ -139,6 +145,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			name : null,
 			type: null,
 			mandatory: null,
+			defaultValue: null,
 			secret : null,
 			minimum: null,
 			maximum: null,
@@ -157,6 +164,9 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 					break;
 				case 'mandatory':
 					loadPropertyMandatory(object, property, attrValue);
+					break;
+				case 'default':
+					loadPropertyDefault(object, property, attrValue);
 					break;
 				case 'secret':
 					loadPropertySecret(object, property, attrValue);
@@ -183,6 +193,9 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			throw new Error(`Minimum is greater than maximum in property <${property.name}> of object <${object.name}>`);
 		if (property.mandatory === null)
 			property.mandatory = true;
+		if (property.defaultValue !== null) {
+			//TODO control default value type 
+		}
 		if (property.secret === null)
 			property.secret = false;
 		if (property.attributes === null)
@@ -853,6 +866,8 @@ function dumpProject(project)
 			if (property.secret)
 				details.push('secret');
 			console.log(`${tab(6)}- Property <${property.name}> (${details.join(', ')})  `);
+			if (property.defaultValue !== null)
+				console.log(`${tab(8)}Default value : ${property.defaultValue}`);
 			if (property.minimum !== null || property.maximum !== null) {
 				const limits = [];
 				if (property.minimum !== null)

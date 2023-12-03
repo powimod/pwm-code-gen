@@ -46,8 +46,10 @@ objects:
         mandatory: false
       - name: "equipmentTypeCount"
         type: "integer"
+        default: 0
       - name: "equipmentCount"
         type: "integer"
+        default: 0
     indexes:
       - name: "name"
         keys:
@@ -69,6 +71,7 @@ objects:
         type: "string"
       - name: "equipmentCount"
         type: "integer"
+        default: 0
     links:
       - name : "family"
         target: "EquipmentFamily"
@@ -123,10 +126,13 @@ objects:
         type: "text"
       - name: "unitCount"
         type: "integer"
+        default: 0
       - name: "sectionCount"
         type: "integer"
+        default: 0
       - name: "equipmentCount"
         type: "integer"
+        default: 0
     indexes:
       - name: "name"
         unique: true
@@ -149,8 +155,10 @@ objects:
         type: "string"
       - name: "sectionCount"
         type: "integer"
+        default: 0
       - name: "equipmentCount"
         type: "integer"
+        default: 0
     links:
       - name: "company"
         target: "Company"
@@ -176,6 +184,7 @@ objects:
         type: "string"
       - name: "equipmentCount"
         type: "integer"
+        default: 0
     links:
       - name: "unit"
         target: "Unit"
