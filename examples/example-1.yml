@@ -47,9 +47,15 @@ objects:
       - name: "equipmentTypeCount"
         type: "integer"
         default: 0
+        attributes:
+          counter: true
+          toto: "25"
+          titi: "ab"
       - name: "equipmentCount"
         type: "integer"
         default: 0
+        attributes:
+          counter: true
     indexes:
       - name: "name"
         keys:

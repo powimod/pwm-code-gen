@@ -7,7 +7,8 @@
 	<h2>Properties</h2>
 	<ul>
 	{% for property in object.properties %}
-		<li>{{ property.name }}</a></li>
+		<li>{{ property.name }}</li>
+		</li>
 	{% endfor %}
 	</ul>
 	{% if object.links.length != 0 %}

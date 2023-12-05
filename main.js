@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 3,
-	revision: 4
+	revision: 5
 };
 
 const {Liquid} = require('liquidjs');
@@ -109,28 +109,24 @@ function loadPropertyMaximum(property, value)
 	property.maximum = value;
 }
 
-
 function loadPropertiesAttributeList(property, attributesDefinition)
 {
 	if (typeof(attributesDefinition) !== 'object')
 		throw new Error(`Attribute list of property <${property.object.name}> of object <${property.object.name}> is not an object`);
 	if (property.attributes !== null)
 		throw new Error(`Attribute list of property <${property.object.name}> of object <${property.object.name}> already defined`);
-
-	let attribute = {
-		_type: 'property-attribute',
-		name: null,
-		value: null,
-		property: property
-	};
-
-	let attributeList = new Map();
+	let attributeList = {};
+	let iAttribute = 0;
 	for (let attributeName of Object.keys(attributesDefinition)) {
+		iAttribute++;
 		const attributeValue = attributesDefinition[attributeName];
-		attributeList.set(attributeName, attributeValue);
+		if (typeof(attributeValue) === 'object') 
+			throw new Error(`Attribute n°${iAttribute} of property <${property.name}> of object <${property.object.name}> is not a string`);
+		if (attributeList[attributeName] !== undefined)
+			throw new Error(`Attribute <${attributeName}> of property <${property.name} of object <${property.object.name}> already exists`);
+		attributeList[attributeName] = attributeValue;
 	}
 	property.attributes = attributeList;
-
 }
 
 function loadObjectPropertyList(object, propertiesDefinition) {
@@ -199,7 +195,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 		if (property.secret === null)
 			property.secret = false;
 		if (property.attributes === null)
-			property.attributes = new Map();
+			property.attributes = {};
 		object.properties.push(property);
 	}
 
@@ -231,9 +227,11 @@ function loadObjectAttributeValue(attribute, value)
 
 
 function loadObjectAttributeList(object, attributesDefinition) {
-	if (attributesDefinition.length === undefined)
+	if (typeof(attributesDefinition) !== 'object')
+		throw new Error(`Attribute list of object <${object.name}> is not an object`);
+	if (object.attributes !== null)
 		throw new Error(`Attribute list of object <${object.name}> is not an array`);
-
+	object.attributes = {};
 	let iAttribute = 0;
 	for (let attributeDefinition of attributesDefinition) {
 		iAttribute++;
@@ -414,7 +412,7 @@ function loadProjectObjectList(project, objectsDefinition) {
 			properties: [],
 			links : [],
 			reverseLinks: [],
-			attributes: {},
+			attributes: null,
 			indexes: [],
 			project: project
 		};
@@ -851,7 +849,7 @@ function dumpProject(project)
 	for (let projectObject of project.objects) {
 		console.log(`\n${tab(2)}- Object <${projectObject.name}> :`);
 
-		console.log(`${tab(2)}  Attributes : `); // TODO ${projectObject.attributes.keys().length}`);
+		console.log(`${tab(2)}  Attributes :`) //x ${projectObject.attributes.size}`);
 		for (let attributeName in projectObject.attributes )  {
 			let attributeValue = projectObject.attributes[attributeName];
 			console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
@@ -878,9 +876,9 @@ function dumpProject(project)
 			}
 			if (property.attributes.size > 0) {
 				console.log(`${tab(8)}Attributes:`);
-				for (let attributeName of property.attributes.keys()){
-					const attributeValue = property.attributes.get(attributeName);
-					console.log(`${tab(10)}- ${attributeName} : ${attributeValue}`);
+				for (let attributeName of property.attributes.keys() )  {
+					let attributeValue = property.attributes.get(attributeName);
+					console.log(`${tab(10)}- Attribut <${attributeName}> = <${attributeValue}>`);
 				}
 			}
 		}
