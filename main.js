@@ -777,21 +777,20 @@ function dumpProject(project)
 		console.log(`${tab(2)}- Data type ${dataType.type} <${dataType.name}>`);
 		if (dataType.type === 'enumeration') 
 			for (let value of dataType.values)
-				console.log(`${tab(4)}- <${value}>`);
+				console.log(`${tab(6)}- <${value}>`);
 	}
-
 
 	console.log(`\nObjects: x${project.objects.length}`);
 	for (let projectObject of project.objects) {
 		console.log(`\n${tab(2)}- Object <${projectObject.name}> :`);
 
-		console.log(`${tab(2)}  Attributes: x${Object.keys(project.attributes).length}`);
+		console.log(`${tab(4)}Attributes: x${Object.keys(project.attributes).length}`);
 		for (let attributeName in projectObject.attributes )  {
 			let attributeValue = projectObject.attributes[attributeName];
 			console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
 		}
 
-		console.log(`${tab(2)}  Properties: x${projectObject.properties.length}`);
+		console.log(`${tab(4)}Properties: x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) {
 			const details = [];
 			details.push(`type:${property.type.name}`);
@@ -819,11 +818,11 @@ function dumpProject(project)
 			}
 		}
 
-		console.log(`${tab(2)}  Links: x${projectObject.links.length}`);
+		console.log(`${tab(4)}Links: x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )
 			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);
 
-		console.log(`${tab(2)}  Indexes: x${projectObject.indexes.length}`);
+		console.log(`${tab(4)}Indexes: x${projectObject.indexes.length}`);
 		for (let index of projectObject.indexes ) {
 			console.log(`${tab(6)}- Index <${index.name}> (unique:${index.unique}) :`);
 			const keyCount = index.keys.length;
@@ -836,8 +835,8 @@ function dumpProject(project)
 	let iFile = 1;
 	for (let file of project.files) {
 		console.log(`${tab(2)}- File n°${iFile++} (scope <${file.scope}>)`);
-		console.log(`${tab(2)}   - Input : <${file.input}>)`);
-		console.log(`${tab(2)}   - Output : <${file.output}>)`);
+		console.log(`${tab(4)}- Input : <${file.input}>)`);
+		console.log(`${tab(4)}- Output : <${file.output}>)`);
 	}
 	console.log('');
 }
