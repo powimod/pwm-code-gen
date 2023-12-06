@@ -21,7 +21,7 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 4,
+	minor: 5,
 	revision: 0
 };
 
@@ -208,7 +208,7 @@ function loadObjectAttributeList(object, attributesDefinition) {
 	if (typeof(attributesDefinition) !== 'object')
 		throw new Error(`Attribute list of object <${object.name}> is not an object`);
 	if (object.attributes !== null)
-		throw new Error(`Attribute list of object <${object.name}> is not an array`);
+		throw new Error(`Attribute list of object <${object.name}> was already defined`);
 	let attributeList = {};
 	let iAttribute = 0;
 	for (let attributeName of Object.keys(attributesDefinition)) {
@@ -510,45 +510,25 @@ function loadProjectAttributeValue(attribute, value)
 }
 
 
-function loadProjectAttributeList(project, attributesDefinition) {
-	if (attributesDefinition.length === undefined)
-		throw new Error(`Attribute list of project <${project.name}> is not an array`);
-
+function loadProjectAttributeList(project, attributesDefinition)
+{
+	if (typeof(attributesDefinition) !== 'object')
+		throw new Error(`Attribute list of project <${project.name}> is not an object`);
+	if (project.attributes !== null)
+		throw new Error(`Attribute list of project <${project.name}> was already defined`);
+	let attributeList = {};
 	let iAttribute = 0;
-	for (let attributeDefinition of attributesDefinition) {
+	for (let attributeName of Object.keys(attributesDefinition)) {
 		iAttribute++;
-		let attribute = {
-			_type : 'project-attribute',
-			name : null,
-			value: null,
-			project: project
-		};
-
-		for (let attrName in attributeDefinition) {
-			let attrValue = attributeDefinition[attrName];
-			switch (attrName) {
-				case 'name':
-					loadProjectAttributeName(attribute, attrValue);
-					break;
-				case 'value':
-					loadProjectAttributeValue(attribute, attrValue);
-					break;
-				default:
-					// FIXME double use of attribute in the same error message
-					throw new Error(`Unknown attribut <${attrName}> in attribute <${attribute.name}> of project <${project.name}>`);
-					break;
-			}
-		}
-		if (attribute.name === null)
-			throw new Error(`Name of attribute n°${iAttribute} of project <${project.name}> is not defined`);
-		if (attribute.value === null)
-			throw new Error(`Value of attribute <${attribute.name}> of project <${project.name}> is not defined`);
-		if (project.attributes[attribute.name] !== undefined)
-			throw new Error(`Attribute <${attribute.name}> of project <${project.name}> already exists`);
-		project.attributes[attribute.name] = attribute.value;
+		const attributeValue = attributesDefinition[attributeName];
+		if (typeof(attributeValue) === 'object') 
+			throw new Error(`Attribute n°${iAttribute} of project <${project.name}> can not be an object`);
+		if (attributeList[attributeName] !== undefined)
+			throw new Error(`Attribute <${attributeName}> of project <${project.name} already exists`);
+		attributeList[attributeName] = attributeValue;
 	}
+	project.attributes = attributeList;
 }
-
 
 
 function loadDataTypeName(dataType, name)
@@ -784,34 +764,34 @@ function dumpProject(project)
 	}
 	console.log(`\nProject <${project.name}> :`);
 
-	console.log(`\nAttributes : x${project.attributes.length}`);
+	console.log(`\nAttributes: x${Object.keys(project.attributes).length}`);
 	for (let attributeName in project.attributes )  {
 		let attributeValue = project.attributes[attributeName];
-		console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
+		console.log(`${tab(2)}- Attribut <${attributeName}> = <${attributeValue}>`);
 	}
 
-	console.log(`\nData types : x${project.dataTypes.length}`);
+	console.log(`\nData types: x${project.dataTypes.length}`);
 	for (let dataType of project.dataTypes )  {
 		if (dataType.internal)
 			continue;
-		console.log(`${tab(6)}- Data type ${dataType.type} <${dataType.name}>`);
+		console.log(`${tab(2)}- Data type ${dataType.type} <${dataType.name}>`);
 		if (dataType.type === 'enumeration') 
 			for (let value of dataType.values)
-				console.log(`${tab(10)}- <${value}>`);
+				console.log(`${tab(4)}- <${value}>`);
 	}
 
 
-	console.log(`\nObjects : x${project.objects.length}`);
+	console.log(`\nObjects: x${project.objects.length}`);
 	for (let projectObject of project.objects) {
 		console.log(`\n${tab(2)}- Object <${projectObject.name}> :`);
 
-		console.log(`${tab(2)}  Attributes :`) //x ${projectObject.attributes.size}`);
+		console.log(`${tab(2)}  Attributes: x${Object.keys(project.attributes).length}`);
 		for (let attributeName in projectObject.attributes )  {
 			let attributeValue = projectObject.attributes[attributeName];
 			console.log(`${tab(6)}- Attribut <${attributeName}> = <${attributeValue}>`);
 		}
 
-		console.log(`${tab(2)}  Properties : x${projectObject.properties.length}`);
+		console.log(`${tab(2)}  Properties: x${projectObject.properties.length}`);
 		for (let property of projectObject.properties) {
 			const details = [];
 			details.push(`type:${property.type.name}`);
@@ -831,7 +811,7 @@ function dumpProject(project)
 				console.log(`${tab(8)}Limits : ${limits.join(', ')}`);
 			}
 			if (property.attributes.size > 0) {
-				console.log(`${tab(8)}Attributes:`);
+				console.log(`${tab(8)}Attributes: x${Object.keys(project.attributes).length}`);
 				for (let attributeName of property.attributes.keys() )  {
 					let attributeValue = property.attributes.get(attributeName);
 					console.log(`${tab(10)}- Attribut <${attributeName}> = <${attributeValue}>`);
@@ -839,11 +819,11 @@ function dumpProject(project)
 			}
 		}
 
-		console.log(`${tab(2)}  Links : x${projectObject.links.length}`);
+		console.log(`${tab(2)}  Links: x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )
 			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);
 
-		console.log(`${tab(2)}  Indexes : x${projectObject.indexes.length}`);
+		console.log(`${tab(2)}  Indexes: x${projectObject.indexes.length}`);
 		for (let index of projectObject.indexes ) {
 			console.log(`${tab(6)}- Index <${index.name}> (unique:${index.unique}) :`);
 			const keyCount = index.keys.length;
@@ -867,7 +847,7 @@ function loadProject(projectDefinition, verbose)
 	let project = {
 		_type: 'project',
 		name : null,
-		attributes: [],
+		attributes: null,
 		dataTypes : internalDataTypes,
 		objects : [],
 		files : [],

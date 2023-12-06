@@ -1,13 +1,9 @@
 name: "test-1"
 
 attributes:
-  - name: "description"
-    value: "My test project"
-  - name: "version"
-    value: "0.0.1"
-  - name: "licence"
-    value: "GPL-V2 (or later)"
-
+  description: "My test project"
+  version: "0.0.1"
+  licence: "GPL-V2 (or later)"
 
 datatypes:
   - name : "dayOfWeek"
