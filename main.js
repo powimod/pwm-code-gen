@@ -21,8 +21,8 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 3,
-	revision: 5
+	minor: 4,
+	revision: 0
 };
 
 const {Liquid} = require('liquidjs');
@@ -121,7 +121,7 @@ function loadPropertiesAttributeList(property, attributesDefinition)
 		iAttribute++;
 		const attributeValue = attributesDefinition[attributeName];
 		if (typeof(attributeValue) === 'object') 
-			throw new Error(`Attribute n°${iAttribute} of property <${property.name}> of object <${property.object.name}> is not a string`);
+			throw new Error(`Attribute n°${iAttribute} of property <${property.name}> of object <${property.object.name}> can not be an object`);
 		if (attributeList[attributeName] !== undefined)
 			throw new Error(`Attribute <${attributeName}> of property <${property.name} of object <${property.object.name}> already exists`);
 		attributeList[attributeName] = attributeValue;
@@ -203,68 +203,24 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 	object.properties[object.properties.length-1]['last'] = true;
 }
 
-function loadObjectAttributeName(attribute, name)
-{
-	if (attribute.name !== null) 
-		throw new Error(`Name of attribute of object <${attribute.object.name}> already defined`);
-	name = name.trim();
-	if (name.length === 0)
-		throw new Error(`Property name of object <${attribute.object.name}> is empty`);
-	if (name.includes(' '))
-		throw new Error(`Invalid attribute name <${name}> of object <${attribute.object.name}> is empty (spaces forbidden)`);
-	attribute.name = name;
-}
-
-function loadObjectAttributeValue(attribute, value)
-{
-	if (attribute.value !== null) 
-		throw new Error(`Value of attribute <${attribute.name}> of object <${attribute.object.name}> already defined`);
-	value = value.trim();
-	if (value.length === 0)
-		throw new Error(`Value of attribute <${attribute.name}> of object <${attribute.object.name}> is empty`);
-	attribute.value = value;
-}
-
 
 function loadObjectAttributeList(object, attributesDefinition) {
 	if (typeof(attributesDefinition) !== 'object')
 		throw new Error(`Attribute list of object <${object.name}> is not an object`);
 	if (object.attributes !== null)
 		throw new Error(`Attribute list of object <${object.name}> is not an array`);
-	object.attributes = {};
+	let attributeList = {};
 	let iAttribute = 0;
-	for (let attributeDefinition of attributesDefinition) {
+	for (let attributeName of Object.keys(attributesDefinition)) {
 		iAttribute++;
-		let attribute = {
-			_type: 'object-attribute',
-			name : null,
-			value: null,
-			object: object
-		};
-
-		for (let attrName in attributeDefinition) {
-			let attrValue = attributeDefinition[attrName];
-			switch (attrName) {
-				case 'name':
-					loadObjectAttributeName(attribute, attrValue);
-					break;
-				case 'value':
-					loadObjectAttributeValue(attribute, attrValue);
-					break;
-				default:
-					// FIXME double use of attribute in the same error message
-					throw new Error(`Unknown attribut <${attrName}> in attribute <${attribute.name}> of object <${object.name}>`);
-					break;
-			}
-		}
-		if (attribute.name === null)
-			throw new Error(`Name of attribute n°${iAttribute} of object <${object.name}> is not defined`);
-		if (attribute.value === null)
-			throw new Error(`Value of attribute <${attribute.name}> of object <${object.name}> is not defined`);
-		if (object.attributes[attribute.name] !== undefined)
-			throw new Error(`Attribute <${attribute.name}> of object <${object.name}> already exists`);
-		object.attributes[attribute.name] = attribute.value;
+		const attributeValue = attributesDefinition[attributeName];
+		if (typeof(attributeValue) === 'object') 
+			throw new Error(`Attribute n°${iAttribute} of property <${property.name}> of object <${property.object.name}> can not be an object`);
+		if (attributeList[attributeName] !== undefined)
+			throw new Error(`Attribute <${attributeName}> of property <${property.name} of object <${property.object.name}> already exists`);
+		attributeList[attributeName] = attributeValue;
 	}
+	object.attributes = attributeList;
 }
 
 function loadIndexName(index, name) {

@@ -30,10 +30,8 @@ objects:
 
   - name: "EquipmentFamily"
     attributes:
-      - name: "description"
-        value: "Family of equipements"
-      - name: "filename"
-        value: "equipment-family"
+      description : "Family of equipements"
+      filename : "equipment-family"
     properties:
       - name: "id"
         type: "uuid"
@@ -64,10 +62,8 @@ objects:
        
   - name: "EquipmentType"
     attributes:
-      - name: "description"
-        value: "Type of equipements"
-      - name: "filename"
-        value: "equipmentType"
+      description: "Type of equipements"
+      filename : "equipmentType"
     properties:
       - name: "id"
         type: "uuid"
@@ -91,8 +87,7 @@ objects:
  
   - name: "Equipment"
     attributes:
-      - name: "filename"
-        value: "equipment"
+      filename: "equipment"
     properties:
       - name: "id"
         type: "uuid"
@@ -121,10 +116,8 @@ objects:
 
   - name: "Company"
     attributes:
-      - name: "description"
-        value: "The company"
-      - name: "filename"
-        value: "company"
+      description: "The company"
+      filename: "company"
     properties:
       - name: "name"
         type: "string"
@@ -148,10 +141,8 @@ objects:
 
   - name: "Unit"
     attributes:
-      - name: "description"
-        value: "building, factories, storerooms, warehous, etc"
-      - name: "filename"
-        value: "unit"
+      description: "building, factories, storerooms, warehous, etc"
+      filename: "unit"
     properties:
       - name: "id"
         type: "uuid"
@@ -177,10 +168,8 @@ objects:
 
   - name: "UnitSection"
     attributes:
-      - name: "description"
-        value: "Part of a unit (room, local, etc)"
-      - name: "filename"
-        value: "unit-section"
+      description: "Part of a unit (room, local, etc)"
+      filename: "unit-section"
     properties:
       - name: "id"
         type: "uuid"
@@ -204,10 +193,8 @@ objects:
 
   - name: "Person"
     attributes:
-      - name: "description"
-        value: "Person working in the company"
-      - name: "filename"
-        value: "person"
+      description : "Person working in the company"
+      filename: "person"
     properties:
       - name: "id"
         type: "id"
