@@ -21,8 +21,8 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 5,
-	revision: 0
+	minor: 6,
+	revision: 1
 };
 
 const {Liquid} = require('liquidjs');
@@ -31,14 +31,17 @@ const fs = require('fs');
 const assert = require('node:assert/strict');
 
 const internalDataTypes = [
-	{ internal: true, name: 'string',  type: 'string'},
-	{ internal: true, name: 'integer', type: 'integer'},
-	{ internal: true, name: 'boolean', type: 'boolean'},
-	{ internal: true, name: 'text'   , type: 'string'},  // multi-lines text
-	{ internal: true, name: 'uuid',    type: 'string'},
-	{ internal: true, name: 'id',      type: 'integer'},
-	{ internal: true, name: 'date',    type: 'Date'},
+	{ internal: true, name: 'string',   type: 'string'},
+	{ internal: true, name: 'integer',  type: 'integer'},
+	{ internal: true, name: 'boolean',  type: 'boolean'},
+	{ internal: true, name: 'text'   ,  type: 'string'},  // multi-lines text
+	{ internal: true, name: 'uuid',     type: 'string'},
+	{ internal: true, name: 'id',       type: 'integer'},
+	{ internal: true, name: 'date',     type: 'date'},
+	{ internal: true, name: 'time',     type: 'time'},
+	{ internal: true, name: 'datetime', type: 'datetime'}
 ];
+
 
 
 function loadPropertyName(property, name) {
@@ -860,9 +863,41 @@ function loadProject(projectDefinition, verbose)
 }
 
 
+function splitToWords(x, v = false){
+	x = x.trim();
+	x = x.replaceAll('-', '_');
+	x = x.replaceAll(' ', '_');
+	x = x.replaceAll('|', '_');
+	x = x.replaceAll(':', '_');
+	if (x.includes('_'))
+		return x.split('_');
+	let t = [];
+	let i, j, w;
+	for (i=0, j=1 ; j <= x.length; j++) {
+		if ( x[j] >= 'A' && x[j] <= 'Z') {
+			t.push(x.substr(i, j-i));
+			i = j;
+		}
+	}
+	t.push(x.substr(i));
+	return t;
+}
+function registerPlugins(Liquid){
+	this.registerFilter('kebabCase', x => splitToWords(x).join('-').toLowerCase());
+	this.registerFilter('snakeCase', x => splitToWords(x).join('_').toLowerCase());
+	this.registerFilter('upperKebabCase', x => splitToWords(x).join('_').toUpperCase());
+	this.registerFilter('upperSnakeCase', x => splitToWords(x).join('-').toUpperCase());
+	this.registerFilter('pascalCase', x => splitToWords(x).map( 
+		x=> ( x.charAt(0).toUpperCase() + x.slice(1).toLowerCase() )
+	).join(''));
+	this.registerFilter('camelCase', x => splitToWords(x).map( 
+		(x,i) => ( i === 0 ? x.toLowerCase() : x.charAt(0).toUpperCase() + x.slice(1).toLowerCase() )
+	).join(''));
+}
 
 async function generateFiles(project, verbose) {
 	const liquid = new Liquid();
+	liquid.plugin(registerPlugins);
 	// generate files
 	if (verbose)
 		console.log("File generation:");
@@ -928,6 +963,8 @@ async function main() {
 		console.error(`Error : ${error.message} in project file <${projectFile}> !`);
 		process.exit(1);
 	}
+
+	// generate files
 
 	try {
 		await generateFiles(project, verbose)
