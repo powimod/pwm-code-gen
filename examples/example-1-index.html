@@ -8,9 +8,13 @@
 	<p>{{project.attributes.description}}</p>
 	<p>{{project.attributes.licence}}</p>
 	<ul>
-	{% for object in project.objects %}
-		<li><a href="{{object.attributes.filename}}.html">{{ object.name }}</a></li>
-	{% endfor %}
+	{%- for object in project.objects %}
+		<li><a href="{{object.name | kebabCase}}.html">{{ object.name }}</a></li>
+	{%- endfor %}
+	{% liquid
+		assign obj = project.objects | where: 'name', 'rendezvous'
+		echo obj.length | prepend: '<!-- obj=' | append: ' -->\n'
+	%}
 	</ul>
 </body>
 </html>

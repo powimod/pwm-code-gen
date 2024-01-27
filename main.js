@@ -39,7 +39,9 @@ const internalDataTypes = [
 	{ internal: true, name: 'id',       type: 'integer'},
 	{ internal: true, name: 'date',     type: 'date'},
 	{ internal: true, name: 'time',     type: 'time'},
-	{ internal: true, name: 'datetime', type: 'datetime'}
+	{ internal: true, name: 'datetime', type: 'datetime'},
+	{ internal: true, name: 'email',    type: 'string'},
+	{ internal: true, name: 'image',    type: 'string'},
 ];
 
 
