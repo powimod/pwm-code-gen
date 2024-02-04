@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 6,
-	revision: 3
+	revision: 4
 };
 
 const {Liquid} = require('liquidjs');
@@ -195,7 +195,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 					loadPropertiesAttributeList(property, attrValue);
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}> in property <${property.name}> of object <${object.name}>`);
+					throw new Error(`Unknown attribute <${attrName}> in property <${property.name}> of object <${object.name}>`);
 					break;
 			}
 		}
@@ -308,7 +308,7 @@ function loadIndexKeyList(index, keyListDefinition)
 					loadIndexKeyType(key, attrName, attrValue);
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}> in index <${index.name}> of <${index.object.name}>`);
+					throw new Error(`Unknown attribute <${attrName}> in index <${index.name}> of <${index.object.name}>`);
 					break;
 			}
 		}
@@ -344,7 +344,7 @@ function loadObjectIndexList(object, indexListDefinition) {
 					loadIndexKeyList(index, attrValue);
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}> in  index n°${index.position}> of object <${object.name}>`);
+					throw new Error(`Unknown attribute <${attrName}> in  index n°${index.position}> of object <${object.name}>`);
 					break;
 			}
 		}
@@ -407,7 +407,7 @@ function loadProjectObjectList(project, objectsDefinition) {
 				case 'links':   // links loading are loaded in second step
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}> in object <${object.name}>`);
+					throw new Error(`Unknown attribute <${attrName}> in object <${object.name}>`);
 					break;
 			}
 		}
@@ -491,7 +491,7 @@ function loadProjectFileList(project, filesDefinition) {
 					loadFileOutput(file, attrValue);
 					break;
 				default:
-					throw new Error(`Unknown attribut <${attrName}>`);
+					throw new Error(`Unknown attribute <${attrName}>`);
 					break;
 			}
 		}
@@ -621,7 +621,7 @@ function loadDataTypeList(project, dataTypesDefinition) {
 					break;
 				default:
 					// FIXME double use of dataType in the same error message
-					throw new Error(`Unknown attribut <${attrName}> in dataType <${dataType.name}>`);
+					throw new Error(`Unknown attribute <${attrName}> in dataType <${dataType.name}>`);
 					break;
 			}
 		}
@@ -658,7 +658,7 @@ function loadProjectStep1(project, projectDefinition, verbose)
 				loadProjectFileList(project, attrValue);
 				break;
 			default:
-				throw new Error(`Unknown attribut <${attrName}>`);
+				throw new Error(`Unknown attribute <${attrName}>`);
 				break;
 		}
 	}
@@ -728,7 +728,7 @@ function loadLink(projectObject, linkDef, verbose) {
 				loadLinkMandatory(link, attrValue);
 				break;
 			default:
-				throw new Error(`Unknown attribut <${attrName} in link definition>`);
+				throw new Error(`Unknown attribute <${attrName}> in link definition`);
 				break;
 		}
 	}
