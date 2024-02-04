@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 6,
-	revision: 2
+	revision: 3
 };
 
 const {Liquid} = require('liquidjs');
@@ -42,6 +42,8 @@ const internalDataTypes = [
 	{ internal: true, name: 'datetime', type: 'datetime'},
 	{ internal: true, name: 'email',    type: 'string'},
 	{ internal: true, name: 'image',    type: 'string'},
+	{ internal: true, name: 'real',     type: 'number'},
+	{ internal: true, name: 'price',    type: 'number'},
 ];
 
 
