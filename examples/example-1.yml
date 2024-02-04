@@ -30,6 +30,7 @@ objects:
     properties:
       - name: "id"
         type: "uuid"
+        pattern: "^[a-z0-9]$"
       - name: "name"
         type: "string"
         minimum: 2

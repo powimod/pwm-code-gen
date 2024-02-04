@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 6,
-	revision: 1
+	revision: 2
 };
 
 const {Liquid} = require('liquidjs');
@@ -95,6 +95,13 @@ function loadPropertySecret(object, property, propSecret) {
 	property.secret = propSecret;
 }
 
+function loadPropertyPattern(object, property, propPattern) {
+	if (property.pattern !== null) // FIXME add property number in error message
+		throw new Error(`Attribute <pattern> of property <${object.name}.${property.name}> is already defined`);
+	if (typeof(propPattern) !== 'string')
+		throw new Error(`Attribute <pattern> of property <${object.name}.${property.name}> is not a string`);
+	property.pattern = propPattern;
+}
 
 function loadPropertyMinimum(property, value)
 {
@@ -148,6 +155,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			mandatory: null,
 			defaultValue: null,
 			secret : null,
+			pattern: null,
 			minimum: null,
 			maximum: null,
 			attributes: null,
@@ -171,6 +179,9 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 					break;
 				case 'secret':
 					loadPropertySecret(object, property, attrValue);
+					break;
+				case 'pattern':
+					loadPropertyPattern(object, property, attrValue);
 					break;
 				case 'minimum':
 					loadPropertyMinimum(property, attrValue);
@@ -806,6 +817,8 @@ function dumpProject(project)
 			console.log(`${tab(6)}- Property <${property.name}> (${details.join(', ')})  `);
 			if (property.defaultValue !== null)
 				console.log(`${tab(8)}Default value : ${property.defaultValue}`);
+			if (property.pattern)
+				console.log(`${tab(8)}Pattern : ${property.pattern}`);
 			if (property.minimum !== null || property.maximum !== null) {
 				const limits = [];
 				if (property.minimum !== null)
