@@ -22,7 +22,7 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 7,
-	revision: 0
+	revision: 1
 };
 
 const {Liquid} = require('liquidjs');
@@ -778,42 +778,42 @@ function loadProjectStep3(project, projectDefinition, verbose)
 }
 
 
-function buildRecursiveFlatLinkList(object) {
-	const flatList = []
-	for (const link of Object.values(object.links)) {
-		for (const flatLink of buildRecursiveFlatLinkList(link.target))
-			flatList.push([link, ...flatLink])
-		flatList.push([link])
-	}
-	return flatList
-}
-
-function buildFlatLinkList(object) {
-	return buildRecursiveFlatLinkList(object) 
-}
-
-function buildRecursiveFlatReverseLinkList(object) {
-	const flatList = []
-	for (const link of Object.values(object.reverseLinks)) {
-		for (const flatLink of buildRecursiveFlatReverseLinkList(link.source))
-			flatList.push([link, ...flatLink])
-		flatList.push([link])
-	}
-	return flatList
-}
-
-
-function buildFlatReverseLinkList(object) {
-	return buildRecursiveFlatReverseLinkList(object) 
-}
-
-function loadProjectStep4(project, projectDefinition, verbose)
-{
-	for (let object of project.objects) {
-		object.flatLinks = buildFlatLinkList(object) 
-		object.flatReverseLinks = buildFlatReverseLinkList(object) 
-	}
-}
+// function buildRecursiveFlatLinkList(object) {
+// 	const flatList = []
+// 	for (const link of Object.values(object.links)) {
+// 		for (const flatLink of buildRecursiveFlatLinkList(link.target))
+// 			flatList.push([link, ...flatLink])
+// 		flatList.push([link])
+// 	}
+// 	return flatList
+// }
+// 
+// function buildFlatLinkList(object) {
+// 	return buildRecursiveFlatLinkList(object) 
+// }
+// 
+// function buildRecursiveFlatReverseLinkList(object) {
+// 	const flatList = []
+// 	for (const link of Object.values(object.reverseLinks)) {
+// 		for (const flatLink of buildRecursiveFlatReverseLinkList(link.source))
+// 			flatList.push([link, ...flatLink])
+// 		flatList.push([link])
+// 	}
+// 	return flatList
+// }
+// 
+// 
+// function buildFlatReverseLinkList(object) {
+// 	return buildRecursiveFlatReverseLinkList(object) 
+// }
+// 
+// function loadProjectStep4(project, projectDefinition, verbose)
+// {
+// 	for (let object of project.objects) {
+// 		object.flatLinks = buildFlatLinkList(object) 
+// 		object.flatReverseLinks = buildFlatReverseLinkList(object) 
+// 	}
+// }
 
 function dumpProject(project)
 {
@@ -914,7 +914,7 @@ function loadProject(projectDefinition, verbose)
 	loadProjectStep1(project, projectDefinition, verbose);
 	loadProjectStep2(project, projectDefinition, verbose);
 	loadProjectStep3(project, projectDefinition, verbose);
-	loadProjectStep4(project, projectDefinition, verbose);
+	//loadProjectStep4(project, projectDefinition, verbose);
 	if (verbose)
 		dumpProject(project);
 	return project;
