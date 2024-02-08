@@ -6,28 +6,50 @@
 	<h1>Object {{ object.name }}</h1>
 	<h2>Properties</h2>
 	<ul>
-	{% for property in object.properties %}
+	{%- for property in object.properties %}
 		<li>{{ property.name }}</li>
-		</li>
-	{% endfor %}
+	{%- endfor %}
 	</ul>
-	{% if object.links.length != 0 %}
+	{%- if object.links.length != 0 %}
 	<h2>Target of objects</h2>
 	<ul>
-	{% for link in object.links %}
+	{%- for link in object.links %}
 		<li><a href="{{ link.target.attributes.filename}}.html">{{ link.name | capitalize }}</a></li>
-	{% endfor %}
+	{%- endfor %}
 	</ul>
-	{% endif %}
+	{%- endif %}
+
+	<h2>Flat link list ({{object.flatLinks.length}})</h2>
+	<ul>
+	{%- for flatLink in object.flatLinks %}
+		<li>
+		{%- for link in flatLink %}
+			<span>{{link._type}} ({{link.source.name}}.{{link.name}} = {{link.target.name}})</span>
+		{%- endfor %}
+		<li>
+	{%- endfor %}
+	</ul>
 
 	{% if object.linkedObjects.length != 0 %}
 	<h2>Reverse linked objects</h2>
 	<ul>
-	{% for reverseLink in object.reverseLinks %}
+	{%- for reverseLink in object.reverseLinks %}
 		<li><a href="{{ reverseLink.source.attributes.filename }}.html">{{ reverseLink.source.name }}</a></li>
-	{% endfor %}
+	{%- endfor %}
 	</ul>
 	{% endif %}
+
+	<h2>Flat reverse link list ({{object.flatLinks.length}})</h2>
+	<ul>
+	{%- for flatReverseLink in object.flatReverseLinks %}
+		<li>
+		{%- assign reversedArray = flatReverseLink %}
+		{%- for reverseLink in reversedArray %}
+			<span>{{reverseLink._type}} ({{reverseLink.target.name}} = {{reverseLink.source.name}}.{{reverseLink.name}})</span>
+		{%- endfor %}
+		<li>
+	{%- endfor %}
+	</ul>
 
 	<a href="index.html">Retour</a>
 

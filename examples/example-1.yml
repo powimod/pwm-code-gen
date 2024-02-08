@@ -50,6 +50,9 @@ objects:
         default: 0
         attributes:
           counter: true
+    links:
+      - name : "company"
+        target: "Company"
     indexes:
       - name: "name"
         keys:
@@ -67,6 +70,9 @@ objects:
       - name: "account_locked"
         type: "boolean"
         default: true
+    links:
+      - name : "company"
+        target: "Company"
        
   - name: "EquipmentType"
     attributes:
@@ -185,6 +191,8 @@ objects:
     links:
       - name: "unit"
         target: "Unit"
+      - name : "company"
+        target: "Company"
     indexes:
       - name: "unit+name"
         unique: true

@@ -21,8 +21,8 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 6,
-	revision: 4
+	minor: 7,
+	revision: 0
 };
 
 const {Liquid} = require('liquidjs');
@@ -370,6 +370,7 @@ function loadObjectName(object, name) {
 		throw new Error(`Object name is empty`);
 	object.name = name;
 }
+
 
 function loadProjectObjectList(project, objectsDefinition) {
 	if (objectsDefinition.length === undefined)
@@ -742,6 +743,7 @@ function loadLink(projectObject, linkDef, verbose) {
 	link.target.reverseLinks.push(link);
 }
 
+
 function loadProjectStep2(project, projectDefinition, verbose)
 {
 	for (let objectDef of projectDefinition.objects) {
@@ -772,6 +774,44 @@ function loadProjectStep3(project, projectDefinition, verbose)
 			throw new Error(`Index list of object <${object.name}> is not an array`);
 
 		loadObjectIndexList(projectObject, indexListDef);
+	}
+}
+
+
+function buildRecursiveFlatLinkList(object) {
+	const flatList = []
+	for (const link of Object.values(object.links)) {
+		for (const flatLink of buildRecursiveFlatLinkList(link.target))
+			flatList.push([link, ...flatLink])
+		flatList.push([link])
+	}
+	return flatList
+}
+
+function buildFlatLinkList(object) {
+	return buildRecursiveFlatLinkList(object) 
+}
+
+function buildRecursiveFlatReverseLinkList(object) {
+	const flatList = []
+	for (const link of Object.values(object.reverseLinks)) {
+		for (const flatLink of buildRecursiveFlatReverseLinkList(link.source))
+			flatList.push([link, ...flatLink])
+		flatList.push([link])
+	}
+	return flatList
+}
+
+
+function buildFlatReverseLinkList(object) {
+	return buildRecursiveFlatReverseLinkList(object) 
+}
+
+function loadProjectStep4(project, projectDefinition, verbose)
+{
+	for (let object of project.objects) {
+		object.flatLinks = buildFlatLinkList(object) 
+		object.flatReverseLinks = buildFlatReverseLinkList(object) 
 	}
 }
 
@@ -874,6 +914,7 @@ function loadProject(projectDefinition, verbose)
 	loadProjectStep1(project, projectDefinition, verbose);
 	loadProjectStep2(project, projectDefinition, verbose);
 	loadProjectStep3(project, projectDefinition, verbose);
+	loadProjectStep4(project, projectDefinition, verbose);
 	if (verbose)
 		dumpProject(project);
 	return project;
