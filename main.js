@@ -22,12 +22,13 @@ const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
 	minor: 7,
-	revision: 1
+	revision: 2
 };
 
 const {Liquid} = require('liquidjs');
 const yaml = require('js-yaml');
 const fs = require('fs');
+const path = require('path');
 const assert = require('node:assert/strict');
 
 const internalDataTypes = [
@@ -940,6 +941,7 @@ function splitToWords(x, v = false){
 	t.push(x.substr(i));
 	return t;
 }
+
 function registerPlugins(Liquid){
 	this.registerFilter('kebabCase', x => splitToWords(x).join('-').toLowerCase());
 	this.registerFilter('snakeCase', x => splitToWords(x).join('_').toLowerCase());
@@ -951,6 +953,11 @@ function registerPlugins(Liquid){
 	this.registerFilter('camelCase', x => splitToWords(x).map( 
 		(x,i) => ( i === 0 ? x.toLowerCase() : x.charAt(0).toUpperCase() + x.slice(1).toLowerCase() )
 	).join(''));
+}
+
+async function createFileDirectory(filePath) {
+	const dirPath = path.dirname(filePath);
+	fs.mkdirSync(dirPath, { recursive: true });
 }
 
 async function generateFiles(project, verbose) {
@@ -970,6 +977,7 @@ async function generateFiles(project, verbose) {
 		if (projectFile.scope === 'project') {
 			let outputFile = await liquid.parseAndRender(projectFile.output, { project: project } );
 			console.log(`* Generating project file ${outputFile}...`);
+			await createFileDirectory(outputFile);
 			let fileContent = await liquid.renderFile(projectFile.input, {project: project});
 			fs.writeFileSync(outputFile, fileContent);
 			continue;
@@ -978,6 +986,7 @@ async function generateFiles(project, verbose) {
 			if (projectFile.scope === 'object') {
 				let outputFile = await liquid.parseAndRender(projectFile.output, { object: projectObject, project: project } );
 				console.log(`* Generating object file ${outputFile}...`);
+				await createFileDirectory(outputFile);
 				let fileContent = await liquid.renderFile(projectFile.input, {object: projectObject, project: project});
 				fs.writeFileSync(outputFile, fileContent);
 				continue;
