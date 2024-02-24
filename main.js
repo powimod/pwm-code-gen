@@ -21,8 +21,8 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 7,
-	revision: 2
+	minor: 8,
+	revision: 0
 };
 
 const {Liquid} = require('liquidjs');
@@ -461,6 +461,18 @@ function loadFileOutput(file, outputFile) {
 	file.output = outputFile;
 }
 
+function loadFileMode(file, mode) {
+	if (file.mode !== null)
+		throw new Error(`File mode already defined`);
+	mode = mode.trim();
+	if (mode.length === 0)
+		throw new Error(`File mode is empty`);
+	const modeValidList = [ 'interpret', 'copy' ];
+	if (! mode in modeValidList)
+		throw new Error(`Invalid file mode <${mode}> (should be ${modeValidList.join('/')})`);
+	file.mode = mode;
+}
+
 function loadProjectFileList(project, filesDefinition) {
 	assert.ok(project !== undefined);
 	assert.ok(filesDefinition !== undefined);
@@ -477,6 +489,7 @@ function loadProjectFileList(project, filesDefinition) {
 			scope: null,
 			input: null,
 			output: null,
+			mode: null,
 			project: project
 		};
 
@@ -492,6 +505,9 @@ function loadProjectFileList(project, filesDefinition) {
 				case 'output':
 					loadFileOutput(file, attrValue);
 					break;
+				case 'mode':
+					loadFileMode(file, attrValue);
+					break;
 				default:
 					throw new Error(`Unknown attribute <${attrName}>`);
 					break;
@@ -503,6 +519,8 @@ function loadProjectFileList(project, filesDefinition) {
 			throw new Error(`Input of file n°${iFile} is not defined`);
 		if (file.output === null)
 			throw new Error(`Output of file n°${iFile} is not defined`);
+		if (file.mode === null)
+			file.mode = 'interpret';
 		project.files.push(file);
 	}
 }
@@ -896,8 +914,8 @@ function dumpProject(project)
 	let iFile = 1;
 	for (let file of project.files) {
 		console.log(`${tab(2)}- File n°${iFile++} (scope <${file.scope}>)`);
-		console.log(`${tab(4)}- Input : <${file.input}>)`);
-		console.log(`${tab(4)}- Output : <${file.output}>)`);
+		console.log(`${tab(4)}- Input : <${file.input}>`);
+		console.log(`${tab(4)}- Output : <${file.output}>`);
 	}
 	console.log('');
 }
@@ -955,9 +973,21 @@ function registerPlugins(Liquid){
 	).join(''));
 }
 
-async function createFileDirectory(filePath) {
-	const dirPath = path.dirname(filePath);
+
+async function generateOutputFile(liquid, inputFilePath, outputFilePath, mode, context) {
+	const dirPath = path.dirname(outputFilePath);
 	fs.mkdirSync(dirPath, { recursive: true });
+	switch (mode) {
+		case 'interpret':
+			let fileContent = await liquid.renderFile(inputFilePath, context);
+			fs.writeFileSync(outputFilePath, fileContent);
+			break;
+		case 'copy':
+			fs.copyFileSync(inputFilePath, outputFilePath);
+			break;
+		default:
+			throw new Error(`Invalid mode <${mode}>`);
+	}
 }
 
 async function generateFiles(project, verbose) {
@@ -970,27 +1000,28 @@ async function generateFiles(project, verbose) {
 	for (let projectFile of project.files){
 		i++;
 		if (verbose) {
-			console.log(`- File n°${i} (scope:${projectFile.scope})`);
-			console.log(`    -> input:${projectFile.input})`);
-			console.log(`    -> ouptut:${projectFile.output})`);
+			console.log(`- File n°${i} (scope: ${projectFile.scope})`);
+			console.log(`    -> input: ${projectFile.input}`);
+			console.log(`    -> ouptut: ${projectFile.output}`);
 		}
-		if (projectFile.scope === 'project') {
-			let outputFile = await liquid.parseAndRender(projectFile.output, { project: project } );
-			console.log(`* Generating project file ${outputFile}...`);
-			await createFileDirectory(outputFile);
-			let fileContent = await liquid.renderFile(projectFile.input, {project: project});
-			fs.writeFileSync(outputFile, fileContent);
-			continue;
-		}
-		for (let projectObject of project.objects){
-			if (projectFile.scope === 'object') {
-				let outputFile = await liquid.parseAndRender(projectFile.output, { object: projectObject, project: project } );
-				console.log(`* Generating object file ${outputFile}...`);
-				await createFileDirectory(outputFile);
-				let fileContent = await liquid.renderFile(projectFile.input, {object: projectObject, project: project});
-				fs.writeFileSync(outputFile, fileContent);
-				continue;
-			}
+		const scope = projectFile.scope;
+		const mode = projectFile.mode;
+		const inputFilePath = projectFile.input;
+		switch (scope) {
+			case 'project' :
+				let outputFilePath = await liquid.parseAndRender(projectFile.output, { project: project } );
+				console.log(`* Generating project file ${outputFilePath} ...`);
+				await generateOutputFile(liquid, inputFilePath, outputFilePath, mode, {project: project});
+				break;
+			case 'object':
+				for (let projectObject of project.objects){
+					let outputFilePath = await liquid.parseAndRender(projectFile.output, { object: projectObject, project: project } );
+					console.log(`* Generating object file ${outputFilePath} ...`);
+					await generateOutputFile(liquid, inputFilePath, outputFilePath, mode, {object: projectObject, project: project});
+				}
+				break;
+			default:
+				throw new Error(`Invalid file scope "${scope}"`);
 		}
 	}
 }
