@@ -224,6 +224,7 @@ objects:
     links:
       - name: "company"
         target: "Company"
+        scope: "protected"
     indexes:
       - name: "lastname+firstname"
         unique: true

@@ -722,6 +722,16 @@ function loadLinkMandatory(objectLink, value) {
 	objectLink.mandatory = value;
 }
 
+function loadLinkScope(object, link, linkScope) {
+	if (link.scope !== null) // FIXME add link number in error message
+		throw new Error(`Attribute <scope> of link <${object.name}.${link.name}> is already defined`);
+    linkScope = linkScope.toLowerCase()
+    const scopeList = [ 'private', 'protected', 'public']
+	if (! scopeList.includes(linkScope)) // FIXME add link number in error message
+		throw new Error(`Attribute <scope> of link <${object.name}.${link.name}> must be <private>, <protected> or <public> (not <${linkScope}>)`);
+	link.scope = linkScope;
+}
+
 function loadLinkTarget(objectLink, targetObjectName) {
 	if (objectLink.target !== null)
 		throw new Error(`Object link target already defined`);
@@ -749,6 +759,7 @@ function loadLink(projectObject, linkDef, verbose) {
 		source: projectObject,
 		target: null,
 		mandatory: null,
+        scope: null,
 		object: projectObject
 	}
 	for (let attrName in linkDef) {
@@ -763,6 +774,9 @@ function loadLink(projectObject, linkDef, verbose) {
 			case 'mandatory':
 				loadLinkMandatory(link, attrValue);
 				break;
+			case 'scope':
+				loadLinkScope(projectObject, link, attrValue);
+				break;
 			default:
 				throw new Error(`Unknown attribute <${attrName}> in link definition`);
 				break;
@@ -774,6 +788,8 @@ function loadLink(projectObject, linkDef, verbose) {
 		throw new Error(`Target of link <${link.name}> is not defined`);
 	if (link.mandatory === null)
 		link.mandatory = true;
+    if (link.scope === null)
+        link.scope = 'public';
 	projectObject.links.push(link);
 	link.target.reverseLinks.push(link);
 }
@@ -916,7 +932,7 @@ function dumpProject(project)
 
 		console.log(`${tab(4)}Links: x${projectObject.links.length}`);
 		for (let objectLink of projectObject.links )
-			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory})`);
+			console.log(`${tab(6)}- Link <${objectLink.name}> (target:${objectLink.target.name}, mandatory:${objectLink.mandatory}, scope:${objectLink.scope})`);
 
 		console.log(`${tab(4)}Indexes: x${projectObject.indexes.length}`);
 		for (let index of projectObject.indexes ) {
