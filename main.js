@@ -21,7 +21,7 @@
 const programName = 'pwm-code-generator';
 const version = {
 	major: 0,
-	minor: 8,
+	minor: 9,
 	revision: 0
 };
 
@@ -88,6 +88,16 @@ function loadPropertyDefault(object, property, value) {
 	if (property.defaultValue !== null)
 		throw new Error(`Attribute <default> of property <${object.name}.${property.name}> is already defined`);
 	property.defaultValue = value;
+}
+
+function loadPropertyScope(object, property, propScope) {
+	if (property.scope !== null) // FIXME add property number in error message
+		throw new Error(`Attribute <scope> of property <${object.name}.${property.name}> is already defined`);
+    propScope = propScope.toLowerCase()
+    const scopeList = [ 'private', 'protected', 'public']
+	if (! scopeList.includes(propScope)) // FIXME add property number in error message
+		throw new Error(`Attribute <scope> of property <${object.name}.${property.name}> must be <private>, <protected> or <public>`);
+	property.scope = propScope;
 }
 
 function loadPropertySecret(object, property, propSecret) {
@@ -158,6 +168,7 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 			mandatory: null,
 			defaultValue: null,
 			secret : null,
+            scope: null,
 			pattern: null,
 			minimum: null,
 			maximum: null,
@@ -179,6 +190,9 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 					break;
 				case 'default':
 					loadPropertyDefault(object, property, attrValue);
+					break;
+				case 'scope':
+					loadPropertyScope(object, property, attrValue);
 					break;
 				case 'secret':
 					loadPropertySecret(object, property, attrValue);
@@ -213,6 +227,8 @@ function loadObjectPropertyList(object, propertiesDefinition) {
 		}
 		if (property.secret === null)
 			property.secret = false;
+		if (property.scope === null)
+			property.scope = 'public';
 		if (property.attributes === null)
 			property.attributes = {};
 		object.properties.push(property);
@@ -875,6 +891,7 @@ function dumpProject(project)
 				details.push('mandatory');
 			if (property.secret)
 				details.push('secret');
+            details.push(property.scope);
 			console.log(`${tab(6)}- Property <${property.name}> (${details.join(', ')})  `);
 			if (property.defaultValue !== null)
 				console.log(`${tab(8)}Default value : ${property.defaultValue}`);
